@@ -1,44 +1,54 @@
+# Copyright (c) 2025, Jayden Grubb <contact@jaydengrubb.com>
+# SPDX-License-Identifier: BSD-3-Clause
+
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-project(Example)
+project(nova)
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(
-	-Wall
-	-Wextra
-	-Wpedantic
-	-Wold-style-cast
-)
+# Configuration Options
+set(NOVA_BUILD_ENGINE ON CACHE BOOL "Build the engine")
+set(NOVA_BUILD_EDITOR ON CACHE BOOL "Build the editor")
+set(NOVA_ENGINE_SHARED ON CACHE BOOL "Build the engine as a shared library")
+set(NOVA_ENGINE_STATIC OFF CACHE BOOL "Build the engine as a static library")
+set(NOVA_EDITOR_STATIC OFF CACHE BOOL "Link the editor against the engine statically")
 
-add_executable(
-	${PROJECT_NAME}
-	src/main.cpp
-)
+if (NOVA_BUILD_EDITOR)
+	if (NOVA_EDITOR_STATIC)
+		set(NOVA_BUILD_ENGINE ON)
+		set(NOVA_ENGINE_STATIC ON)
+	else ()
+		set(NOVA_ENGINE_SHARED ON)
+	endif ()
+endif ()
 
-# find_package(Example REQUIRED)
-
-include_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}/include
-	# ${Example_INCLUDE_DIRS}
-)
-
-target_link_libraries(
-	${PROJECT_NAME}
-	# ${Example_LIBRARIES}
-)
-
-if (CMAKE_IMPORT_LIBRARY_SUFFIX)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-		COMMAND_EXPAND_LISTS
+if (MSVC)
+	add_compile_options(
+		/W3
+		/permissive-
+		/EHsc
+	)
+else ()
+	add_compile_options(
+		-Wall
+		-Wextra
+		-Wpedantic
 	)
 endif ()
 
-add_custom_target(run
-	COMMAND ${PROJECT_NAME}
-	DEPENDS ${PROJECT_NAME}
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+if (WIN32)
+	add_compile_definitions(
+		_CRT_SECURE_NO_WARNINGS
+		NOMINMAX
+	)
+endif ()
+
+if (NOVA_BUILD_ENGINE)
+	add_subdirectory(engine)
+endif ()
+if (NOVA_BUILD_EDITOR)
+	add_subdirectory(editor)
+endif ()
