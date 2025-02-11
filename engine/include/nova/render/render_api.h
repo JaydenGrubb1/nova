@@ -4,10 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <nova/test.h>
+#pragma once
 
-#include <cstdio>
-
-void func() {
-	std::printf("Hello, world!\n");
-}
+namespace Nova {
+	enum class RenderAPI { VULKAN };
+} // namespace Nova
