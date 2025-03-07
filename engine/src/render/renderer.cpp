@@ -12,17 +12,12 @@
 
 using namespace Nova;
 
-static Renderer* s_instance = nullptr;
+static std::unique_ptr<RenderDriver> s_driver;
 
 void Renderer::create(const RenderAPI api) {
-	if (s_instance) {
-		// TODO: Log error
-		return;
-	}
-	s_instance = new Renderer();
 	switch (api) {
 		case RenderAPI::VULKAN:
-			get()->m_driver = std::make_unique<VulkanRenderDriver>();
+			s_driver = std::make_unique<VulkanRenderDriver>();
 			break;
 		default:
 			// TODO: Log error
@@ -31,17 +26,9 @@ void Renderer::create(const RenderAPI api) {
 }
 
 void Renderer::shutdown() {
-	if (!s_instance) {
-		// TODO: Log error
-		return;
-	}
-	delete s_instance;
-}
-
-Renderer* Renderer::get() {
-	return s_instance;
+	s_driver.reset();
 }
 
 RenderDriver* Renderer::get_driver() {
-	return get()->m_driver.get();
+	return s_driver.get();
 }

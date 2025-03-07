@@ -10,20 +10,11 @@
 #include <nova/render/render_api.h>
 #include <nova/render/render_driver.h>
 
-#include <memory>
-
 namespace Nova {
 	class NOVA_API Renderer {
 	  public:
 		static void create(RenderAPI api);
 		static void shutdown();
-		static Renderer* get();
 		static RenderDriver* get_driver();
-
-	  private:
-		std::unique_ptr<RenderDriver> m_driver;
-
-		Renderer() = default;
-		~Renderer() = default;
 	};
 } // namespace Nova
