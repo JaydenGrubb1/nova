@@ -4,35 +4,59 @@
 find_package(Vulkan REQUIRED)
 include(FetchContent)
 
+FetchContent_Declare(
+	spdlog
+	GIT_REPOSITORY https://github.com/gabime/spdlog.git
+	GIT_TAG f355b3d58f7067eee1706ff3c801c2361011f3d5 # v1.15.1
+	FIND_PACKAGE_ARGS NAMES spdlog
+)
+FetchContent_MakeAvailable(spdlog)
+
 set(ENGINE_SRC
+	core/debug.cpp
 	drivers/vulkan/render_driver.cpp
 	render/renderer.cpp
 )
 
 list(TRANSFORM ENGINE_SRC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
-include_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}/include
+set(ENGINE_INCLUDES_PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/src
 	${Vulkan_INCLUDE_DIRS}
 )
-
-set(ENGINE_LIBS
+set(ENGINE_INCLUDES_PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${spdlog_INCLUDE_DIRS}
+)
+set(ENGINE_LIBS_PRIVATE
 	Vulkan::Vulkan
+)
+set(ENGINE_LIBS_PUBLIC
+	spdlog::spdlog
 )
 
 if (NOVA_ENGINE_SHARED)
 	add_library(nova SHARED ${ENGINE_SRC})
+	target_include_directories(nova
+		PUBLIC ${ENGINE_INCLUDES_PUBLIC}
+		PRIVATE ${ENGINE_INCLUDES_PRIVATE}
+	)
+	target_link_libraries(nova
+		PUBLIC ${ENGINE_LIBS_PUBLIC}
+		PRIVATE ${ENGINE_LIBS_PRIVATE}
+	)
 	target_compile_definitions(nova PRIVATE
 		NOVA_DLL_EXPORT
-	)
-	target_link_libraries(nova PRIVATE
-		${ENGINE_LIBS}
 	)
 endif ()
 if (NOVA_ENGINE_STATIC)
 	add_library(nova_static STATIC ${ENGINE_SRC})
-	target_link_libraries(nova_static PRIVATE
-		${ENGINE_LIBS}
+	target_include_directories(nova_static PUBLIC
+		PUBLIC ${ENGINE_INCLUDES_PUBLIC}
+		PRIVATE ${ENGINE_INCLUDES_PRIVATE}
+	)
+	target_link_libraries(nova_static PUBLIC
+		PUBLIC ${ENGINE_LIBS_PUBLIC}
+		PRIVATE ${ENGINE_LIBS_PRIVATE}
 	)
 endif ()
