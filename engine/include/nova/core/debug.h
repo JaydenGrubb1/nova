@@ -22,8 +22,8 @@ namespace Nova {
 		NOVA_API void _assert_fail(std::string_view assertion, std::string_view file, std::string_view func, int line);
 
 		consteval std::string_view _format_func_name(const std::string_view name) {
-			const auto start = name.find_first_of(' ') + 1;
-			const auto end = name.find_first_of('(');
+			const auto end = name.find('(');
+			const auto start = name.rfind(' ', end) + 1;
 			return name.substr(start, end - start);
 		}
 	} // namespace Internals
