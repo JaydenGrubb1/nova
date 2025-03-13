@@ -6,18 +6,17 @@
 
 #include "drivers/vulkan/render_driver.h"
 
+#include <nova/core/debug.h>
 #include <vulkan/vulkan.h>
-
-#include <cstdio>
 
 using namespace Nova;
 
 VulkanRenderDriver::VulkanRenderDriver() {
-	std::printf("VulkanRenderDriver::VulkanRenderDriver()\n");
+	NOVA_AUTO_TRACE();
 }
 
 VulkanRenderDriver::~VulkanRenderDriver() {
-	std::printf("VulkanRenderDriver::~VulkanRenderDriver()\n");
+	NOVA_AUTO_TRACE();
 }
 
 RenderAPI VulkanRenderDriver::get_api() const {
