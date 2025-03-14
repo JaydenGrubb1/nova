@@ -11,12 +11,6 @@
 
 #include <memory>
 
-#ifdef _MSC_VER
-	#define NOVA_FUNC_NAME __FUNCTION__
-#else
-	#define NOVA_FUNC_NAME __PRETTY_FUNCTION__
-#endif
-
 namespace Nova {
 	namespace Internals {
 		NOVA_API void _assert_fail(std::string_view assertion, std::string_view file, std::string_view func, int line);
@@ -57,10 +51,15 @@ namespace Nova {
 #define NOVA_DEBUG(...) ::Nova::Debug::get_logger()->debug(__VA_ARGS__)
 #define NOVA_TRACE(...) ::Nova::Debug::get_logger()->trace(__VA_ARGS__)
 
-#define NOVA_AUTO_TRACE() NOVA_TRACE("{}()", ::Nova::Internals::_format_func_name(NOVA_FUNC_NAME))
+#ifdef _MSC_VER
+	#define NOVA_FUNC_NAME ::Nova::Internals::_format_func_name(__FUNCTION__)
+#else
+	#define NOVA_FUNC_NAME ::Nova::Internals::_format_func_name(__PRETTY_FUNCTION__)
+#endif
+
+#define NOVA_AUTO_TRACE() NOVA_TRACE("{}()", NOVA_FUNC_NAME)
 
 #define NOVA_ASSERT(expr) \
 	(static_cast<bool>(expr) \
 		 ? static_cast<void>(0) \
-		 : ::Nova::Internals:: \
-			   _assert_fail(#expr, __FILE__, ::Nova::Internals::_format_func_name(NOVA_FUNC_NAME), __LINE__))
+		 : ::Nova::Internals::_assert_fail(#expr, __FILE__, NOVA_FUNC_NAME, __LINE__))
