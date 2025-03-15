@@ -25,6 +25,7 @@ VulkanRenderDriver::VulkanRenderDriver() {
 	_check_extensions();
 	_check_layers();
 	_init_instance();
+	_init_devices();
 }
 
 VulkanRenderDriver::~VulkanRenderDriver() {
@@ -40,6 +41,14 @@ u32 VulkanRenderDriver::get_api_version() const {
 	u32 version;
 	vkEnumerateInstanceVersion(&version);
 	return version;
+}
+
+u32 VulkanRenderDriver::get_device_count() const {
+	return m_devices.size();
+}
+
+const RenderDevice& VulkanRenderDriver::get_device(const u32 index) const {
+	return m_devices[index];
 }
 
 void VulkanRenderDriver::_check_version() const {
@@ -158,6 +167,29 @@ void VulkanRenderDriver::_init_instance() {
 	}
 
 	NOVA_LOG("VkInstance created");
+}
+
+void VulkanRenderDriver::_init_devices() {
+	NOVA_AUTO_TRACE();
+
+	u32 count;
+	vkEnumeratePhysicalDevices(m_instance, &count, nullptr); // TODO: Check result
+	std::vector<VkPhysicalDevice> devices(count);
+	vkEnumeratePhysicalDevices(m_instance, &count, devices.data()); // TODO: Check result
+
+	m_devices.reserve(count);
+
+	for (const auto& device : devices) {
+		VkPhysicalDeviceProperties properties;
+		vkGetPhysicalDeviceProperties(device, &properties);
+
+		m_devices.emplace_back();
+		m_devices.back().name = properties.deviceName;
+		m_devices.back().vendor = static_cast<RenderDevice::Vendor>(properties.vendorID);
+		m_devices.back().type = static_cast<RenderDevice::Type>(properties.deviceType);
+		m_devices.back().deviceID = properties.deviceID;
+		m_devices.back().handle = device;
+	}
 }
 
 VkAllocationCallbacks* VulkanRenderDriver::_get_allocator(const VkObjectType type) {
