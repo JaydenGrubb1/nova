@@ -22,19 +22,30 @@ namespace Nova {
 
 		[[nodiscard]] u32 get_device_count() const override;
 		[[nodiscard]] const RenderDevice& get_device(u32 index) const override;
+		void create_device(u32 index) override;
 
 	  private:
 		VkInstance m_instance = VK_NULL_HANDLE;
+		VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
+		VkDevice m_device = VK_NULL_HANDLE;
+		VkPhysicalDeviceFeatures m_features = {};
 
 		std::vector<const char*> m_extensions;
 		std::vector<const char*> m_layers;
+		std::vector<const char*> m_device_extensions;
 		std::vector<RenderDevice> m_devices;
 
 		void _check_version() const;
 		void _check_extensions();
 		void _check_layers();
 		void _init_instance();
-		void _init_devices();
+		void _init_hardware();
+
+		// TODO: Other init functions for device
+		void _check_device_extensions();
+		void _check_device_features();
+		void _init_queues(std::vector<VkDeviceQueueCreateInfo>& queues) const;
+		void _init_device(const std::vector<VkDeviceQueueCreateInfo>& queues);
 
 		static VkAllocationCallbacks* _get_allocator(VkObjectType type);
 	};
