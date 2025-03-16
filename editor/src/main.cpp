@@ -12,13 +12,16 @@
 using namespace Nova;
 
 int main() {
+	Debug::get_logger()->set_level(spdlog::level::trace);
+
 	Renderer::create(RenderAPI::VULKAN);
+	const auto driver = Renderer::get_driver();
 
-	const auto api = Renderer::get_driver()->get_api();
-	const auto version = Renderer::get_driver()->get_api_version();
-
-	Debug::log("API: {}", static_cast<u32>(api));
-	Debug::log("Version: {}", version);
+	if (driver->get_device_count() == 0) {
+		Debug::log_error("No devices found");
+		return EXIT_FAILURE;
+	}
+	driver->create_device(0);
 
 	Renderer::shutdown();
 	return EXIT_SUCCESS;
