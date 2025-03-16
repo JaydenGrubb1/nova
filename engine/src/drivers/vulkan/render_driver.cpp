@@ -53,16 +53,14 @@ u32 VulkanRenderDriver::get_device_count() const {
 }
 
 const RenderDevice& VulkanRenderDriver::get_device(const u32 index) const {
+	NOVA_ASSERT(index < m_devices.size());
 	return m_devices[index];
 }
 
 void VulkanRenderDriver::create_device(const u32 index) {
 	NOVA_AUTO_TRACE();
-
-	if (m_device) {
-		NOVA_ERROR("VkDevice already created");
-		return;
-	}
+	NOVA_ASSERT(index < m_devices.size());
+	NOVA_ASSERT(!m_device);
 
 	m_physical_device = static_cast<VkPhysicalDevice>(m_devices[index].handle);
 	std::vector<VkDeviceQueueCreateInfo> queues;

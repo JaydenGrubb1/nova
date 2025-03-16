@@ -17,6 +17,7 @@ static std::unique_ptr<RenderDriver> s_driver;
 
 void Renderer::create(const RenderAPI api) {
 	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(!s_driver);
 	switch (api) {
 		case RenderAPI::VULKAN:
 			s_driver = std::make_unique<VulkanRenderDriver>();
@@ -33,5 +34,6 @@ void Renderer::shutdown() {
 }
 
 RenderDriver* Renderer::get_driver() {
+	NOVA_ASSERT(s_driver);
 	return s_driver.get();
 }
