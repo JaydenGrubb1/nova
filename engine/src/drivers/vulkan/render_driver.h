@@ -19,6 +19,8 @@ namespace Nova {
 
 		[[nodiscard]] RenderAPI get_api() const override;
 		[[nodiscard]] u32 get_api_version() const override;
+		[[nodiscard]] std::string get_api_name() const override;
+		[[nodiscard]] std::string get_api_version_string() const override;
 
 		[[nodiscard]] u32 get_device_count() const override;
 		[[nodiscard]] const RenderDevice& get_device(u32 index) const override;

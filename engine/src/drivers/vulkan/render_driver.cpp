@@ -12,8 +12,8 @@
 #include <nova/version.h>
 #include <vulkan/vulkan.h>
 
+#include <format>
 #include <unordered_map>
-#include <unordered_set>
 
 #define VALIDATION_LAYER "VK_LAYER_KHRONOS_validation"
 
@@ -46,6 +46,21 @@ u32 VulkanRenderDriver::get_api_version() const {
 	u32 version;
 	vkEnumerateInstanceVersion(&version);
 	return version;
+}
+
+std::string VulkanRenderDriver::get_api_name() const {
+	return "Vulkan";
+}
+
+std::string VulkanRenderDriver::get_api_version_string() const {
+	const u32 version = get_api_version();
+	return std::format(
+		"{}.{}.{}-{}",
+		VK_API_VERSION_MAJOR(version),
+		VK_API_VERSION_MINOR(version),
+		VK_API_VERSION_PATCH(version),
+		VK_API_VERSION_VARIANT(version)
+	);
 }
 
 u32 VulkanRenderDriver::get_device_count() const {
