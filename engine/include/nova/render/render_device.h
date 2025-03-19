@@ -13,6 +13,7 @@
 
 namespace Nova {
 	struct NOVA_API RenderDevice {
+		static constexpr u32 AUTO = static_cast<u32>(-1);
 		enum class Vendor { UNKNOWN = 0, INTEL = 0x8086, AMD = 0x1002, NVIDIA = 0x10de };
 		enum class Type { OTHER = 0, INTEGRATED = 1, DISCRETE = 2, VIRTUAL = 3, CPU = 4 };
 

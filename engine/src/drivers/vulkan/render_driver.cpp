@@ -72,17 +72,24 @@ const RenderDevice& VulkanRenderDriver::get_device(const u32 index) const {
 	return m_devices[index];
 }
 
-void VulkanRenderDriver::create_device(const u32 index) {
+void VulkanRenderDriver::create_device(u32 index) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(index < m_devices.size());
 	NOVA_ASSERT(!m_device);
 
+	if (index == RenderDevice::AUTO) {
+		index = _pick_device();
+	} else {
+		NOVA_ASSERT(index < m_devices.size());
+	}
+
+	NOVA_LOG("Using device: {}", m_devices[index].name);
 	m_physical_device = static_cast<VkPhysicalDevice>(m_devices[index].handle);
-	std::vector<VkDeviceQueueCreateInfo> queues;
 
 	_check_device_extensions();
 	_check_device_features();
 	// TODO: Check device capabilities
+
+	std::vector<VkDeviceQueueCreateInfo> queues;
 	_init_queues(queues);
 	_init_device(queues);
 }
@@ -228,6 +235,43 @@ void VulkanRenderDriver::_init_hardware() {
 
 		NOVA_LOG("Found device: {}", properties.deviceName);
 	}
+
+	if (m_devices.empty()) {
+		throw std::runtime_error("No devices found");
+	}
+}
+
+u32 VulkanRenderDriver::_pick_device() const {
+	NOVA_AUTO_TRACE();
+
+	u32 best_index = 0;
+	u32 best_score = 0;
+
+	for (u32 i = 0; i < m_devices.size(); i++) {
+		u32 score = 0;
+		switch (m_devices[i].type) {
+			case RenderDevice::Type::DISCRETE:
+				score += 4;
+				break;
+			case RenderDevice::Type::INTEGRATED:
+				score += 3;
+				break;
+			case RenderDevice::Type::VIRTUAL:
+				score += 2;
+				break;
+			case RenderDevice::Type::CPU:
+				score += 1;
+				break;
+			default:
+				break;
+		}
+		if (score > best_score) {
+			best_index = i;
+			best_score = score;
+		}
+	}
+
+	return best_index;
 }
 
 void VulkanRenderDriver::_check_device_extensions() {
