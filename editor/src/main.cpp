@@ -15,13 +15,7 @@ int main() {
 	Debug::get_logger()->set_level(spdlog::level::trace);
 
 	Renderer::create(RenderAPI::VULKAN);
-	const auto driver = Renderer::get_driver();
-
-	if (driver->get_device_count() == 0) {
-		Debug::log_error("No devices found");
-		return EXIT_FAILURE;
-	}
-	driver->create_device(0);
+	Renderer::get_driver()->create_device(RenderDevice::AUTO);
 
 	Renderer::shutdown();
 	return EXIT_SUCCESS;
