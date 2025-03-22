@@ -22,6 +22,7 @@ FetchContent_MakeAvailable(SDL3)
 
 set(ENGINE_SRC
 	core/debug.cpp
+	drivers/dx12/render_driver.cpp
 	drivers/vulkan/render_driver.cpp
 	render/renderer.cpp
 )

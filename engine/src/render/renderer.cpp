@@ -9,6 +9,7 @@
 
 #include <memory>
 
+#include "drivers/dx12/render_driver.h"
 #include "drivers/vulkan/render_driver.h"
 
 using namespace Nova;
@@ -19,6 +20,9 @@ void Renderer::create(const RenderAPI api) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(!s_driver);
 	switch (api) {
+		case RenderAPI::DX12:
+			s_driver = std::make_unique<DX12RenderDriver>();
+			break;
 		case RenderAPI::VULKAN:
 			s_driver = std::make_unique<VulkanRenderDriver>();
 			break;

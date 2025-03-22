@@ -7,5 +7,5 @@
 #pragma once
 
 namespace Nova {
-	enum class RenderAPI { VULKAN };
+	enum class RenderAPI { DX12, VULKAN };
 } // namespace Nova
