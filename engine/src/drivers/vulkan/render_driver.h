@@ -43,7 +43,6 @@ namespace Nova {
 		void _init_instance();
 		void _init_hardware();
 
-		u32 _pick_device() const;
 		void _check_device_extensions();
 		void _check_device_features();
 		void _init_queues(std::vector<VkDeviceQueueCreateInfo>& queues) const;

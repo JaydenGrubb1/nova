@@ -24,6 +24,7 @@ set(ENGINE_SRC
 	core/debug.cpp
 	drivers/vulkan/render_driver.cpp
 	render/renderer.cpp
+	render/render_device.cpp
 )
 
 list(TRANSFORM ENGINE_SRC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/)
