@@ -43,6 +43,7 @@ if (WIN32)
 	add_compile_definitions(
 		_CRT_SECURE_NO_WARNINGS
 		NOMINMAX
+		WIN32_LEAN_AND_MEAN
 	)
 endif ()
 

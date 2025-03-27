@@ -64,7 +64,7 @@ std::string VulkanRenderDriver::get_api_version_string() const {
 }
 
 u32 VulkanRenderDriver::get_device_count() const {
-	return m_devices.size();
+	return static_cast<u32>(m_devices.size());
 }
 
 const RenderDevice& VulkanRenderDriver::get_device(const u32 index) const {
@@ -200,9 +200,9 @@ void VulkanRenderDriver::_init_instance() {
 	VkInstanceCreateInfo create {};
 	create.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	create.pApplicationInfo = &appinfo;
-	create.enabledLayerCount = m_layers.size();
+	create.enabledLayerCount = static_cast<u32>(m_layers.size());
 	create.ppEnabledLayerNames = m_layers.data();
-	create.enabledExtensionCount = m_extensions.size();
+	create.enabledExtensionCount = static_cast<u32>(m_extensions.size());
 	create.ppEnabledExtensionNames = m_extensions.data();
 
 	if (vkCreateInstance(&create, _get_allocator(VK_OBJECT_TYPE_INSTANCE), &m_instance) != VK_SUCCESS) {
@@ -328,11 +328,11 @@ void VulkanRenderDriver::_init_device(const std::vector<VkDeviceQueueCreateInfo>
 
 	VkDeviceCreateInfo create {};
 	create.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	create.enabledLayerCount = m_layers.size();
+	create.enabledLayerCount = static_cast<u32>(m_layers.size());
 	create.ppEnabledLayerNames = m_layers.data();
-	create.enabledExtensionCount = m_device_extensions.size();
+	create.enabledExtensionCount = static_cast<u32>(m_device_extensions.size());
 	create.ppEnabledExtensionNames = m_device_extensions.data();
-	create.queueCreateInfoCount = queues.size();
+	create.queueCreateInfoCount = static_cast<u32>(queues.size());
 	create.pQueueCreateInfos = queues.data();
 	create.pEnabledFeatures = &m_features;
 	// TODO: pNext for additional features
