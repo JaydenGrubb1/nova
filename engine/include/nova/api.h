@@ -7,7 +7,7 @@
 #pragma once
 
 #ifndef NOVA_API
-	#ifdef WIN32
+	#ifdef NOVA_WINDOWS
 		#ifdef NOVA_DLL_EXPORT
 			#define NOVA_API __declspec(dllexport)
 		#elif NOVA_DLL_IMPORT
@@ -15,7 +15,7 @@
 		#else
 			#define NOVA_API
 		#endif
-	#else
+	#elif NOVA_LINUX
 		#ifdef NOVA_DLL_EXPORT
 			#define NOVA_API __attribute__((visibility("default")))
 		#else

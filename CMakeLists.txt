@@ -41,9 +41,15 @@ endif ()
 
 if (WIN32)
 	add_compile_definitions(
-		_CRT_SECURE_NO_WARNINGS
+		NOVA_WINDOWS
 		NOMINMAX
 		WIN32_LEAN_AND_MEAN
+		_CRT_SECURE_NO_WARNINGS
+		_CRT_NONSTDC_NO_WARNINGS
+	)
+else ()
+	add_compile_definitions(
+		NOVA_LINUX
 	)
 endif ()
 

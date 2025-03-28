@@ -1,8 +1,54 @@
 # Copyright (c) 2025, Jayden Grubb <contact@jaydengrubb.com>
 # SPDX-License-Identifier: BSD-3-Clause
 
-find_package(Vulkan REQUIRED)
 include(FetchContent)
+
+set(NOVA_VULKAN ON CACHE BOOL "Enable Vulkan support")
+set(NOVA_WAYLAND ON CACHE BOOL "Enable Wayland support")
+set(NOVA_X11 ON CACHE BOOL "Enable X11 support")
+
+set(ENGINE_SRC
+	core/debug.cpp
+	platform/system.cpp
+	render/renderer.cpp
+	render/render_device.cpp
+)
+
+if (WIN32)
+	set(ENGINE_SRC
+		${ENGINE_SRC}
+		drivers/windows/system_driver.cpp
+	)
+	set(NOVA_WAYLAND OFF)
+	set(NOVA_X11 OFF)
+else ()
+	set(ENGINE_SRC
+		${ENGINE_SRC}
+		drivers/linux/system_driver.cpp
+	)
+endif ()
+
+if (NOVA_VULKAN)
+	find_package(Vulkan REQUIRED)
+	set(ENGINE_SRC
+		${ENGINE_SRC}
+		drivers/vulkan/render_driver.cpp
+	)
+endif ()
+if (NOVA_WAYLAND)
+	set(ENGINE_SRC
+		${ENGINE_SRC}
+		drivers/linux/wayland/system_driver.cpp
+	)
+endif ()
+if (NOVA_X11)
+	set(ENGINE_SRC
+		${ENGINE_SRC}
+		drivers/linux/x11/system_driver.cpp
+	)
+endif ()
+
+list(TRANSFORM ENGINE_SRC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
 FetchContent_Declare(
 	spdlog
@@ -20,23 +66,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SDL3)
 
-set(ENGINE_SRC
-	core/debug.cpp
-	drivers/vulkan/render_driver.cpp
-	drivers/windows/system_driver.cpp
-	drivers/linux/system_driver.cpp
-	drivers/linux/wayland/system_driver.cpp
-	drivers/linux/x11/system_driver.cpp
-	platform/system.cpp
-	render/renderer.cpp
-	render/render_device.cpp
-)
-
-list(TRANSFORM ENGINE_SRC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/)
-
 set(ENGINE_INCLUDES_PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/src
-	${Vulkan_INCLUDE_DIRS}
+	$<$<BOOL:${NOVA_VULKAN}>:${Vulkan_INCLUDE_DIRS}>
 	${SDL3_INCLUDE_DIRS}
 )
 set(ENGINE_INCLUDES_PUBLIC
@@ -44,11 +76,16 @@ set(ENGINE_INCLUDES_PUBLIC
 	${spdlog_INCLUDE_DIRS}
 )
 set(ENGINE_LIBS_PRIVATE
-	Vulkan::Vulkan
+	$<$<BOOL:${NOVA_VULKAN}>:Vulkan::Vulkan>
 	SDL3::SDL3
 )
 set(ENGINE_LIBS_PUBLIC
 	spdlog::spdlog
+)
+set(ENGINE_DEFS
+	$<$<BOOL:${NOVA_VULKAN}>:NOVA_VULKAN>
+	$<$<BOOL:${NOVA_WAYLAND}>:NOVA_WAYLAND>
+	$<$<BOOL:${NOVA_X11}>:NOVA_X11>
 )
 
 if (NOVA_ENGINE_SHARED)
@@ -63,6 +100,7 @@ if (NOVA_ENGINE_SHARED)
 	)
 	target_compile_definitions(nova PRIVATE
 		NOVA_DLL_EXPORT
+		${ENGINE_DEFS}
 	)
 endif ()
 if (NOVA_ENGINE_STATIC)
@@ -74,5 +112,8 @@ if (NOVA_ENGINE_STATIC)
 	target_link_libraries(nova_static PUBLIC
 		PUBLIC ${ENGINE_LIBS_PUBLIC}
 		PRIVATE ${ENGINE_LIBS_PRIVATE}
+	)
+	target_compile_definitions(nova_static PRIVATE
+		${ENGINE_DEFS}
 	)
 endif ()
