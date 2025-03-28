@@ -7,11 +7,14 @@
 #pragma once
 
 #include <nova/platform/system_driver.h>
+#include <windows.h>
 
 namespace Nova {
 	class WindowsSystemDriver final : public SystemDriver {
 	  public:
 		WindowsSystemDriver();
 		~WindowsSystemDriver() override;
+
+		[[nodiscard]] const char* get_surface_extension() const override;
 	};
 } // namespace Nova
