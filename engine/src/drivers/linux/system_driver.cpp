@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "drivers/linux/system_driver.h"
+
 #ifdef NOVA_WAYLAND
 	#include "drivers/linux/wayland/system_driver.h"
 #endif
@@ -13,8 +15,6 @@
 
 #include <nova/core/debug.h>
 
-#include "drivers/linux/system_driver.h"
-
 using namespace Nova;
 
 LinuxSystemDriver::LinuxSystemDriver() {
@@ -23,6 +23,11 @@ LinuxSystemDriver::LinuxSystemDriver() {
 
 LinuxSystemDriver::~LinuxSystemDriver() {
 	NOVA_AUTO_TRACE();
+}
+
+const char* LinuxSystemDriver::get_surface_extension() const {
+	NOVA_WARN("System driver does not support surfaces");
+	return nullptr;
 }
 
 std::unique_ptr<SystemDriver> LinuxSystemDriver::get_default_driver() {

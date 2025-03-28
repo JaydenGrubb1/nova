@@ -6,6 +6,11 @@
 
 #include "drivers/linux/x11/system_driver.h"
 
+#ifdef NOVA_VULKAN
+	#include <vulkan/vulkan.h>
+	#include <vulkan/vulkan_xlib.h>
+#endif
+
 #include <nova/core/debug.h>
 
 using namespace Nova;
@@ -16,4 +21,12 @@ X11SystemDriver::X11SystemDriver() {
 
 X11SystemDriver::~X11SystemDriver() {
 	NOVA_AUTO_TRACE();
+}
+
+const char* X11SystemDriver::get_surface_extension() const {
+#ifdef NOVA_VULKAN
+	return VK_KHR_XLIB_SURFACE_EXTENSION_NAME;
+#else
+	return nullptr;
+#endif
 }

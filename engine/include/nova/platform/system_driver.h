@@ -12,5 +12,7 @@ namespace Nova {
 	class NOVA_API SystemDriver {
 	  public:
 		virtual ~SystemDriver() = default;
+
+		[[nodiscard]] virtual const char* get_surface_extension() const = 0;
 	};
 } // namespace Nova

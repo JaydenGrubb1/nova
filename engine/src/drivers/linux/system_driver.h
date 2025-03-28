@@ -16,6 +16,8 @@ namespace Nova {
 		LinuxSystemDriver();
 		~LinuxSystemDriver() override;
 
+		[[nodiscard]] const char* get_surface_extension() const override;
+
 		static std::unique_ptr<SystemDriver> get_default_driver();
 	};
 } // namespace Nova

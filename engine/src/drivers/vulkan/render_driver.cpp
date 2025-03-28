@@ -6,9 +6,8 @@
 
 #include "drivers/vulkan/render_driver.h"
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_vulkan.h>
 #include <nova/core/debug.h>
+#include <nova/platform/system.h>
 #include <nova/version.h>
 #include <vulkan/vulkan.h>
 
@@ -117,12 +116,8 @@ void VulkanRenderDriver::_check_extensions() {
 	u32 count;
 	std::unordered_map<std::string_view, bool> requested; // <extension, required>
 
-	// Find required extensions
-	SDL_Init(SDL_INIT_VIDEO); // TODO: Move to SDL driver
-	const auto required = SDL_Vulkan_GetInstanceExtensions(&count);
-	for (u32 i = 0; i < count; ++i) {
-		requested[required[i]] = true;
-	}
+	requested[VK_KHR_SURFACE_EXTENSION_NAME] = true;
+	requested[System::get_driver()->get_surface_extension()] = true;
 
 	// Add optional extensions
 	requested[VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME] = false;
