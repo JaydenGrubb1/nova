@@ -9,9 +9,9 @@
 #include <nova/platform/system_driver.h>
 
 namespace Nova {
-	class Win32SystemDriver final : public SystemDriver {
+	class LinuxSystemDriver : public SystemDriver {
 	  public:
-		Win32SystemDriver();
-		~Win32SystemDriver() override;
+		LinuxSystemDriver();
+		~LinuxSystemDriver() override;
 	};
 } // namespace Nova

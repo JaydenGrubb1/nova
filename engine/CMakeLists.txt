@@ -23,8 +23,10 @@ FetchContent_MakeAvailable(SDL3)
 set(ENGINE_SRC
 	core/debug.cpp
 	drivers/vulkan/render_driver.cpp
-	drivers/win32/system_driver.cpp
-	drivers/x11/system_driver.cpp
+	drivers/windows/system_driver.cpp
+	drivers/linux/system_driver.cpp
+	drivers/linux/wayland/system_driver.cpp
+	drivers/linux/x11/system_driver.cpp
 	platform/system.cpp
 	render/renderer.cpp
 	render/render_device.cpp

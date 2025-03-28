@@ -7,8 +7,9 @@
 #include <nova/core/debug.h>
 #include <nova/platform/system.h>
 
-#include "drivers/win32/system_driver.h"
-#include "drivers/x11/system_driver.h"
+#include "drivers/linux/wayland/system_driver.h"
+#include "drivers/linux/x11/system_driver.h"
+#include "drivers/windows/system_driver.h"
 
 using namespace Nova;
 
@@ -19,10 +20,16 @@ void System::init() {
 	NOVA_ASSERT(!s_driver);
 
 #ifdef WIN32
-	s_driver = std::make_unique<Win32SystemDriver>();
+	s_driver = std::make_unique<WindowsSystemDriver>();
 #else
-	// TODO: Detect Wayland
-	s_driver = std::make_unique<X11SystemDriver>();
+	if (std::getenv("WAYLAND_DISPLAY")) {
+		s_driver = std::make_unique<WaylandSystemDriver>();
+	} else if (std::getenv("DISPLAY")) {
+		s_driver = std::make_unique<X11SystemDriver>();
+	} else {
+		NOVA_ERROR("Unsupported windowing system");
+		s_driver = std::make_unique<LinuxSystemDriver>();
+	}
 #endif
 }
 

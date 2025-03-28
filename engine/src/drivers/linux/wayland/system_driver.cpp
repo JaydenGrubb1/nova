@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "drivers/x11/system_driver.h"
+#include "drivers/linux/wayland/system_driver.h"
 
 #include <nova/core/debug.h>
 
 using namespace Nova;
 
-X11SystemDriver::X11SystemDriver() {
+WaylandSystemDriver::WaylandSystemDriver() {
 	NOVA_AUTO_TRACE();
 }
 
-X11SystemDriver::~X11SystemDriver() {
+WaylandSystemDriver::~WaylandSystemDriver() {
 	NOVA_AUTO_TRACE();
 }

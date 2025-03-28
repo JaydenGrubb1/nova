@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include <nova/platform/system_driver.h>
+#include "drivers/linux/system_driver.h"
 
 namespace Nova {
-	class X11SystemDriver final : public SystemDriver {
+	class X11SystemDriver final : public LinuxSystemDriver {
 	  public:
 		X11SystemDriver();
 		~X11SystemDriver() override;
