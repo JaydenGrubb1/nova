@@ -6,6 +6,12 @@
 
 #pragma once
 
+#include <nova/render/render_driver.h>
+
 namespace Nova {
-	enum class RenderAPI { DX12, VULKAN };
+	class DX12RenderDriver final : public RenderDriver {
+	  public:
+		DX12RenderDriver();
+		~DX12RenderDriver() override;
+	};
 } // namespace Nova

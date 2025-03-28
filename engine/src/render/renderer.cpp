@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#ifdef NOVA_DX12
+	#include "drivers/dx12/render_driver.h"
+#endif
 #ifdef NOVA_VULKAN
 	#include "drivers/vulkan/render_driver.h"
 #endif
@@ -22,6 +25,11 @@ void Renderer::init(const RenderAPI api) {
 	NOVA_ASSERT(!s_driver);
 
 	switch (api) {
+#ifdef NOVA_DX12
+		case RenderAPI::DX12:
+			s_driver = std::make_unique<DX12RenderDriver>();
+			break;
+#endif
 #ifdef NOVA_VULKAN
 		case RenderAPI::VULKAN:
 			s_driver = std::make_unique<VulkanRenderDriver>();
