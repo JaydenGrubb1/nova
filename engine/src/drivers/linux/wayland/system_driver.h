@@ -9,9 +9,9 @@
 #include "drivers/linux/system_driver.h"
 
 namespace Nova {
-class WaylandSystemDriver final : public LinuxSystemDriver {
-  public:
-	WaylandSystemDriver();
-	~WaylandSystemDriver() override;
-};
-} // Nova
+	class WaylandSystemDriver final : public LinuxSystemDriver {
+	  public:
+		WaylandSystemDriver();
+		~WaylandSystemDriver() override;
+	};
+} // namespace Nova

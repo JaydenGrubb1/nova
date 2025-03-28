@@ -36,20 +36,32 @@ DerivePointerAlignment: false
 FixNamespaceComments: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex:           '^<ext/.*\.h>'
-    Priority:        2
-    SortPriority:    0
-    CaseSensitive:   false
-  - Regex:           '^<.*\.h>'
+  - Regex:           '^".*\.hpp"'
     Priority:        1
     SortPriority:    0
     CaseSensitive:   false
-  - Regex:           '^<.*'
+  - Regex:           '^".*\.hh"'
+    Priority:        1
+    SortPriority:    1
+    CaseSensitive:   false
+  - Regex:           '^".*\.h"'
     Priority:        2
     SortPriority:    0
     CaseSensitive:   false
-  - Regex:           '.*'
+  - Regex:           '^<.*\.hpp>'
     Priority:        3
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '^<.*\.hh>'
+    Priority:        3
+    SortPriority:    1
+    CaseSensitive:   false
+  - Regex:           '^<.*\.h>'
+    Priority:        4
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '^<.*>'
+    Priority:        5
     SortPriority:    0
     CaseSensitive:   false
 IncludeIsMainRegex: '([-_](test|unittest))?$'
