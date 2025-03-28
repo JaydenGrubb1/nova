@@ -13,7 +13,7 @@
 namespace Nova {
 	class NOVA_API Renderer {
 	  public:
-		static void create(RenderAPI api);
+		static void init(RenderAPI api);
 		static void shutdown();
 		static RenderDriver* get_driver();
 	};

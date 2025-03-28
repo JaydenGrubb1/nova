@@ -15,7 +15,7 @@ using namespace Nova;
 
 static std::unique_ptr<RenderDriver> s_driver;
 
-void Renderer::create(const RenderAPI api) {
+void Renderer::init(const RenderAPI api) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(!s_driver);
 	switch (api) {

@@ -16,7 +16,7 @@ int main() {
 	Debug::get_logger()->set_level(spdlog::level::trace);
 
 	System::init();
-	Renderer::create(RenderAPI::VULKAN);
+	Renderer::init(RenderAPI::VULKAN);
 	Renderer::get_driver()->create_device(RenderDevice::AUTO);
 
 	Renderer::shutdown();
