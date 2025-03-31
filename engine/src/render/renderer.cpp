@@ -4,12 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifdef NOVA_DX12
-	#include "drivers/dx12/render_driver.h"
-#endif
-#ifdef NOVA_VULKAN
-	#include "drivers/vulkan/render_driver.h"
-#endif
+#include "drivers/dx12/render_driver.h" // IWYU pragma: keep
+#include "drivers/vulkan/render_driver.h" // IWYU pragma: keep
 
 #include <nova/core/debug.h>
 #include <nova/render/renderer.h>

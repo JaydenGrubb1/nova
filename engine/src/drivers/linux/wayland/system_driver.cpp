@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#ifdef NOVA_WAYLAND
+
 #include "drivers/linux/wayland/system_driver.h"
 
 #include <nova/core/debug.h>
@@ -17,3 +19,5 @@ WaylandSystemDriver::WaylandSystemDriver() {
 WaylandSystemDriver::~WaylandSystemDriver() {
 	NOVA_AUTO_TRACE();
 }
+
+#endif // NOVA_WAYLAND

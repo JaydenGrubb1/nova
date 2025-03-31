@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifdef NOVA_WINDOWS
+
 #include <nova/platform/system_driver.h>
 #include <windows.h>
 
@@ -18,3 +20,5 @@ namespace Nova {
 		[[nodiscard]] const char* get_surface_extension() const override;
 	};
 } // namespace Nova
+
+#endif // NOVA_WINDOWS

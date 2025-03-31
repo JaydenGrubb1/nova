@@ -8,53 +8,29 @@ set(NOVA_VULKAN ON CACHE BOOL "Enable Vulkan support")
 set(NOVA_WAYLAND ON CACHE BOOL "Enable Wayland support")
 set(NOVA_X11 ON CACHE BOOL "Enable X11 support")
 
+if (WIN32)
+	set(NOVA_WAYLAND OFF)
+	set(NOVA_X11 OFF)
+else ()
+	set(NOVA_DX12 OFF)
+endif ()
+
+if (NOVA_VULKAN)
+	find_package(Vulkan REQUIRED)
+endif ()
+
 set(ENGINE_SRC
 	core/debug.cpp
+	drivers/dx12/render_driver.cpp
+	drivers/linux/system_driver.cpp
+	drivers/linux/wayland/system_driver.cpp
+	drivers/linux/x11/system_driver.cpp
+	drivers/windows/system_driver.cpp
+	drivers/vulkan/render_driver.cpp
 	platform/system.cpp
 	render/renderer.cpp
 	render/render_device.cpp
 )
-
-if (WIN32)
-	set(ENGINE_SRC
-		${ENGINE_SRC}
-		drivers/windows/system_driver.cpp
-	)
-	set(NOVA_WAYLAND OFF)
-	set(NOVA_X11 OFF)
-else ()
-	set(ENGINE_SRC
-		${ENGINE_SRC}
-		drivers/linux/system_driver.cpp
-	)
-	set(NOVA_DX12 OFF)
-endif ()
-
-if (NOVA_DX12)
-	set(ENGINE_SRC
-		${ENGINE_SRC}
-		drivers/dx12/render_driver.cpp
-	)
-endif ()
-if (NOVA_VULKAN)
-	find_package(Vulkan REQUIRED)
-	set(ENGINE_SRC
-		${ENGINE_SRC}
-		drivers/vulkan/render_driver.cpp
-	)
-endif ()
-if (NOVA_WAYLAND)
-	set(ENGINE_SRC
-		${ENGINE_SRC}
-		drivers/linux/wayland/system_driver.cpp
-	)
-endif ()
-if (NOVA_X11)
-	set(ENGINE_SRC
-		${ENGINE_SRC}
-		drivers/linux/x11/system_driver.cpp
-	)
-endif ()
 
 list(TRANSFORM ENGINE_SRC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 

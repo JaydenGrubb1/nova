@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifdef NOVA_DX12
+
 #include <nova/render/render_driver.h>
 
 namespace Nova {
@@ -15,3 +17,5 @@ namespace Nova {
 		~DX12RenderDriver() override;
 	};
 } // namespace Nova
+
+#endif // NOVA_DX12

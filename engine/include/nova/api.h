@@ -6,6 +6,7 @@
 
 #pragma once
 
+// clang-format off
 #ifndef NOVA_API
 	#ifdef NOVA_WINDOWS
 		#ifdef NOVA_DLL_EXPORT
@@ -23,3 +24,4 @@
 		#endif
 	#endif
 #endif
+// clang-format on

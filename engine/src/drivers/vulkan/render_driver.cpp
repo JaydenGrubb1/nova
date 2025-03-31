@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#ifdef NOVA_VULKAN
+
 #include "drivers/vulkan/render_driver.h"
 
 #include <nova/core/debug.h>
@@ -344,3 +346,5 @@ VkAllocationCallbacks* VulkanRenderDriver::_get_allocator(const VkObjectType typ
 	(void)type;
 	return nullptr;
 }
+
+#endif // NOVA_VULKAN

@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifdef NOVA_X11
+
 #include "drivers/linux/system_driver.h"
 
 #include <X11/Xlib.h>
@@ -19,3 +21,5 @@ namespace Nova {
 		[[nodiscard]] const char* get_surface_extension() const override;
 	};
 } // namespace Nova
+
+#endif // NOVA_X11

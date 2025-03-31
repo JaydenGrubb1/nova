@@ -4,12 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifdef NOVA_WINDOWS
-	#include "drivers/windows/system_driver.h"
-#endif
-#ifdef NOVA_LINUX
-	#include "drivers/linux/system_driver.h"
-#endif
+#include "drivers/linux/system_driver.h" // IWYU pragma: keep
+#include "drivers/windows/system_driver.h" // IWYU pragma: keep
 
 #include <nova/core/debug.h>
 #include <nova/platform/system.h>

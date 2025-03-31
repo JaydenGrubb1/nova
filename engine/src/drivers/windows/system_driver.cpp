@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#ifdef NOVA_WINDOWS
+
 #include "drivers/windows/system_driver.h"
 
 #ifdef NOVA_VULKAN
-	#include <vulkan/vulkan.h>
-	#include <vulkan/vulkan_win32.h>
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_win32.h>
 #endif
 
 #include <nova/core/debug.h>
@@ -30,3 +32,5 @@ const char* WindowsSystemDriver::get_surface_extension() const {
 	return nullptr;
 #endif
 }
+
+#endif // NOVA_WINDOWS

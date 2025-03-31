@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifdef NOVA_LINUX
+
 #include <nova/platform/system_driver.h>
 
 #include <memory>
@@ -21,3 +23,5 @@ namespace Nova {
 		static std::unique_ptr<SystemDriver> get_default_driver();
 	};
 } // namespace Nova
+
+#endif // NOVA_LINUX

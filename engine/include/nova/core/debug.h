@@ -52,9 +52,9 @@ namespace Nova {
 #define NOVA_TRACE(...) ::Nova::Debug::get_logger()->trace(__VA_ARGS__)
 
 #ifdef _MSC_VER
-	#define NOVA_FUNC_NAME ::Nova::Internals::_format_func_name(__FUNCTION__)
+#define NOVA_FUNC_NAME ::Nova::Internals::_format_func_name(__FUNCTION__)
 #else
-	#define NOVA_FUNC_NAME ::Nova::Internals::_format_func_name(__PRETTY_FUNCTION__)
+#define NOVA_FUNC_NAME ::Nova::Internals::_format_func_name(__PRETTY_FUNCTION__)
 #endif
 
 #define NOVA_AUTO_TRACE() NOVA_TRACE("{}()", NOVA_FUNC_NAME)

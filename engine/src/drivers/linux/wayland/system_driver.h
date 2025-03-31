@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifdef NOVA_WAYLAND
+
 #include "drivers/linux/system_driver.h"
 
 namespace Nova {
@@ -15,3 +17,5 @@ namespace Nova {
 		~WaylandSystemDriver() override;
 	};
 } // namespace Nova
+
+#endif // NOVA_WAYLAND

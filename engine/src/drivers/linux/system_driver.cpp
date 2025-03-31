@@ -4,14 +4,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#ifdef NOVA_LINUX
+
 #include "drivers/linux/system_driver.h"
 
-#ifdef NOVA_WAYLAND
-	#include "drivers/linux/wayland/system_driver.h"
-#endif
-#ifdef NOVA_X11
-	#include "drivers/linux/x11/system_driver.h"
-#endif
+#include "drivers/linux/wayland/system_driver.h" // IWYU pragma: keep
+#include "drivers/linux/x11/system_driver.h" // IWYU pragma: keep
 
 #include <nova/core/debug.h>
 
@@ -47,3 +45,5 @@ std::unique_ptr<SystemDriver> LinuxSystemDriver::get_default_driver() {
 	NOVA_WARN("Unsupported display server");
 	return std::make_unique<LinuxSystemDriver>();
 }
+
+#endif // NOVA_LINUX

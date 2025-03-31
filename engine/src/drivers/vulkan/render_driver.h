@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifdef NOVA_VULKAN
+
 #include <nova/render/render_driver.h>
 #include <vulkan/vulkan.h>
 
@@ -51,3 +53,5 @@ namespace Nova {
 		static VkAllocationCallbacks* _get_allocator(VkObjectType type);
 	};
 } // namespace Nova
+
+#endif // NOVA_VULKAN
