@@ -15,6 +15,8 @@ namespace Nova {
 	  public:
 		WaylandSystemDriver();
 		~WaylandSystemDriver() override;
+
+		[[nodiscard]] const char* get_surface_extension() const override;
 	};
 } // namespace Nova
 

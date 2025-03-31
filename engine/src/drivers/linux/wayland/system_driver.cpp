@@ -8,6 +8,11 @@
 
 #include "drivers/linux/wayland/system_driver.h"
 
+#ifdef NOVA_VULKAN
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_wayland.h>
+#endif
+
 #include <nova/core/debug.h>
 
 using namespace Nova;
@@ -18,6 +23,14 @@ WaylandSystemDriver::WaylandSystemDriver() {
 
 WaylandSystemDriver::~WaylandSystemDriver() {
 	NOVA_AUTO_TRACE();
+}
+
+const char* WaylandSystemDriver::get_surface_extension() const {
+#ifdef NOVA_VULKAN
+	return VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME;
+#else
+	return nullptr;
+#endif
 }
 
 #endif // NOVA_WAYLAND

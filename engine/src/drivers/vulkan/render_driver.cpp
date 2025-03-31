@@ -118,8 +118,13 @@ void VulkanRenderDriver::_check_extensions() {
 	u32 count;
 	std::unordered_map<std::string_view, bool> requested; // <extension, required>
 
+	const auto surface_extension = System::get_driver()->get_surface_extension();
+	if (!surface_extension) {
+		throw std::runtime_error("Could not determine required surface extension");
+	}
+
 	requested[VK_KHR_SURFACE_EXTENSION_NAME] = true;
-	requested[System::get_driver()->get_surface_extension()] = true;
+	requested[surface_extension] = true;
 
 	// Add optional extensions
 	requested[VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME] = false;
