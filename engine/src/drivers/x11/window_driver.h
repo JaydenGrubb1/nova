@@ -6,19 +6,19 @@
 
 #pragma once
 
-#ifdef NOVA_WINDOWS
+#ifdef NOVA_X11
 
-#include <nova/platform/system_driver.h>
-#include <windows.h>
+#include <X11/Xlib.h>
+#include <nova/platform/window_driver.h>
 
 namespace Nova {
-	class WindowsSystemDriver final : public SystemDriver {
+	class X11WindowDriver final : public WindowDriver {
 	  public:
-		WindowsSystemDriver();
-		~WindowsSystemDriver() override;
+		X11WindowDriver();
+		~X11WindowDriver() override;
 
 		[[nodiscard]] const char* get_surface_extension() const override;
 	};
 } // namespace Nova
 
-#endif // NOVA_WINDOWS
+#endif // NOVA_X11

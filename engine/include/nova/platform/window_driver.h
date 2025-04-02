@@ -9,9 +9,9 @@
 #include <nova/api.h>
 
 namespace Nova {
-	class NOVA_API SystemDriver {
+	class NOVA_API WindowDriver {
 	  public:
-		virtual ~SystemDriver() = default;
+		virtual ~WindowDriver() = default;
 
 		[[nodiscard]] virtual const char* get_surface_extension() const = 0;
 	};

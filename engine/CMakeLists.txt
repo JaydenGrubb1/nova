@@ -22,11 +22,10 @@ endif ()
 set(ENGINE_SRC
 	core/debug.cpp
 	drivers/dx12/render_driver.cpp
-	drivers/linux/system_driver.cpp
-	drivers/linux/wayland/system_driver.cpp
-	drivers/linux/x11/system_driver.cpp
-	drivers/windows/system_driver.cpp
 	drivers/vulkan/render_driver.cpp
+	drivers/wayland/window_driver.cpp
+	drivers/win32/window_driver.cpp
+	drivers/x11/window_driver.cpp
 	platform/system.cpp
 	render/renderer.cpp
 	render/render_device.cpp
@@ -42,18 +41,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(spdlog)
 
-FetchContent_Declare(
-	SDL3
-	GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-	GIT_TAG 22422f7748d5128135995ed34c8f8012861c7332 # preview-3.1.8
-	FIND_PACKAGE_ARGS NAMES SDL3
-)
-FetchContent_MakeAvailable(SDL3)
-
 set(ENGINE_INCLUDES_PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/src
 	$<$<BOOL:${NOVA_VULKAN}>:${Vulkan_INCLUDE_DIRS}>
-	${SDL3_INCLUDE_DIRS}
 )
 set(ENGINE_INCLUDES_PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -61,7 +51,6 @@ set(ENGINE_INCLUDES_PUBLIC
 )
 set(ENGINE_LIBS_PRIVATE
 	$<$<BOOL:${NOVA_VULKAN}>:Vulkan::Vulkan>
-	SDL3::SDL3
 )
 set(ENGINE_LIBS_PUBLIC
 	spdlog::spdlog

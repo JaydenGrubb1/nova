@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "drivers/linux/system_driver.h" // IWYU pragma: keep
-#include "drivers/windows/system_driver.h" // IWYU pragma: keep
+#include "drivers/wayland/window_driver.h" // IWYU pragma: keep
+#include "drivers/win32/window_driver.h" // IWYU pragma: keep
+#include "drivers/x11/window_driver.h" // IWYU pragma: keep
 
 #include <nova/core/debug.h>
 #include <nova/platform/system.h>
@@ -14,7 +15,7 @@
 
 using namespace Nova;
 
-static std::unique_ptr<SystemDriver> s_driver;
+static std::unique_ptr<WindowDriver> s_driver;
 
 void System::init() {
 	NOVA_AUTO_TRACE();
@@ -23,7 +24,19 @@ void System::init() {
 #ifdef NOVA_WINDOWS
 	s_driver = std::make_unique<WindowsSystemDriver>();
 #elif NOVA_LINUX
-	s_driver = LinuxSystemDriver::get_default_driver();
+#ifdef NOVA_WAYLAND
+	if (std::getenv("WAYLAND_DISPLAY")) {
+		s_driver = std::make_unique<WaylandWindowDriver>();
+		return;
+	}
+#endif
+#ifdef NOVA_X11
+	if (std::getenv("DISPLAY")) {
+		s_driver = std::make_unique<X11WindowDriver>();
+		return;
+	}
+#endif
+	throw std::runtime_error("No suitable display server found");
 #else
 	throw std::runtime_error("Unsupported platform");
 #endif
@@ -34,7 +47,7 @@ void System::shutdown() {
 	s_driver.reset();
 }
 
-SystemDriver* System::get_driver() {
+WindowDriver* System::get_driver() {
 	NOVA_ASSERT(s_driver);
 	return s_driver.get();
 }

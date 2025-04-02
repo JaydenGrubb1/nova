@@ -6,7 +6,7 @@
 
 #ifdef NOVA_WAYLAND
 
-#include "drivers/linux/wayland/system_driver.h"
+#include "drivers/wayland/window_driver.h"
 
 #ifdef NOVA_VULKAN
 #include <vulkan/vulkan.h>
@@ -17,15 +17,15 @@
 
 using namespace Nova;
 
-WaylandSystemDriver::WaylandSystemDriver() {
+WaylandWindowDriver::WaylandWindowDriver() {
 	NOVA_AUTO_TRACE();
 }
 
-WaylandSystemDriver::~WaylandSystemDriver() {
+WaylandWindowDriver::~WaylandWindowDriver() {
 	NOVA_AUTO_TRACE();
 }
 
-const char* WaylandSystemDriver::get_surface_extension() const {
+const char* WaylandWindowDriver::get_surface_extension() const {
 #ifdef NOVA_VULKAN
 	return VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME;
 #else

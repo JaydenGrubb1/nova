@@ -7,13 +7,13 @@
 #pragma once
 
 #include <nova/api.h>
-#include <nova/platform/system_driver.h>
+#include <nova/platform/window_driver.h>
 
 namespace Nova {
 	class NOVA_API System {
 	  public:
 		static void init();
 		static void shutdown();
-		static SystemDriver* get_driver();
+		static WindowDriver* get_driver();
 	};
 } // namespace Nova

@@ -4,33 +4,33 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifdef NOVA_X11
+#ifdef NOVA_WINDOWS
 
-#include "drivers/linux/x11/system_driver.h"
+#include "drivers/win32/window_driver.h"
 
 #ifdef NOVA_VULKAN
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_xlib.h>
+#include <vulkan/vulkan_win32.h>
 #endif
 
 #include <nova/core/debug.h>
 
 using namespace Nova;
 
-X11SystemDriver::X11SystemDriver() {
+Win32WindowDriver::Win32WindowDriver() {
 	NOVA_AUTO_TRACE();
 }
 
-X11SystemDriver::~X11SystemDriver() {
+Win32WindowDriver::~Win32WindowDriver() {
 	NOVA_AUTO_TRACE();
 }
 
-const char* X11SystemDriver::get_surface_extension() const {
+const char* Win32WindowDriver::get_surface_extension() const {
 #ifdef NOVA_VULKAN
-	return VK_KHR_XLIB_SURFACE_EXTENSION_NAME;
+	return VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
 #else
 	return nullptr;
 #endif
 }
 
-#endif // NOVA_X11
+#endif // NOVA_WINDOWS

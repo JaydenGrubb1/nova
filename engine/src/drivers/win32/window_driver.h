@@ -6,18 +6,19 @@
 
 #pragma once
 
-#ifdef NOVA_WAYLAND
+#ifdef NOVA_WINDOWS
 
-#include "drivers/linux/system_driver.h"
+#include <nova/platform/window_driver.h>
+#include <windows.h>
 
 namespace Nova {
-	class WaylandSystemDriver final : public LinuxSystemDriver {
+	class Win32WindowDriver final : public WindowDriver {
 	  public:
-		WaylandSystemDriver();
-		~WaylandSystemDriver() override;
+		Win32WindowDriver();
+		~Win32WindowDriver() override;
 
 		[[nodiscard]] const char* get_surface_extension() const override;
 	};
 } // namespace Nova
 
-#endif // NOVA_WAYLAND
+#endif // NOVA_WINDOWS
