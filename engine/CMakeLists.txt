@@ -51,6 +51,7 @@ set(ENGINE_INCLUDES_PUBLIC
 )
 set(ENGINE_LIBS_PRIVATE
 	$<$<BOOL:${NOVA_VULKAN}>:Vulkan::Vulkan>
+	$<$<BOOL:${NOVA_X11}>:X11>
 )
 set(ENGINE_LIBS_PUBLIC
 	spdlog::spdlog
