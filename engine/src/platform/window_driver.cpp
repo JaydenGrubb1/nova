@@ -9,45 +9,27 @@
 #include "drivers/x11/window_driver.h" // IWYU pragma: keep
 
 #include <nova/core/debug.h>
-#include <nova/platform/system.h>
-
-#include <memory>
+#include <nova/platform/window_driver.h>
 
 using namespace Nova;
 
-static std::unique_ptr<WindowDriver> s_driver;
-
-void System::init() {
+WindowDriver* WindowDriver::create() {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(!s_driver);
-
 #ifdef NOVA_WINDOWS
-	s_driver = std::make_unique<WindowsSystemDriver>();
+	return new Win32WindowDriver();
 #elif NOVA_LINUX
 #ifdef NOVA_WAYLAND
 	if (std::getenv("WAYLAND_DISPLAY")) {
-		s_driver = std::make_unique<WaylandWindowDriver>();
-		return;
+		return new WaylandWindowDriver();
 	}
 #endif
 #ifdef NOVA_X11
 	if (std::getenv("DISPLAY")) {
-		s_driver = std::make_unique<X11WindowDriver>();
-		return;
+		return new X11WindowDriver();
 	}
 #endif
 	throw std::runtime_error("No suitable display server found");
 #else
 	throw std::runtime_error("Unsupported platform");
 #endif
-}
-
-void System::shutdown() {
-	NOVA_AUTO_TRACE();
-	s_driver.reset();
-}
-
-WindowDriver* System::get_driver() {
-	NOVA_ASSERT(s_driver);
-	return s_driver.get();
 }

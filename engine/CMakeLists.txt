@@ -26,9 +26,10 @@ set(ENGINE_SRC
 	drivers/wayland/window_driver.cpp
 	drivers/win32/window_driver.cpp
 	drivers/x11/window_driver.cpp
-	platform/system.cpp
+	platform/window_driver.cpp
 	render/renderer.cpp
 	render/render_device.cpp
+	render/render_driver.cpp
 )
 
 list(TRANSFORM ENGINE_SRC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/)

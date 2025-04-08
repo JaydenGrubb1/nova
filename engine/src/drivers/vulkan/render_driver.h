@@ -16,7 +16,7 @@
 namespace Nova {
 	class VulkanRenderDriver final : public RenderDriver {
 	  public:
-		VulkanRenderDriver();
+		VulkanRenderDriver(WindowDriver* window_driver);
 		~VulkanRenderDriver() override;
 
 		[[nodiscard]] RenderAPI get_api() const override;
@@ -29,6 +29,7 @@ namespace Nova {
 		void create_device(u32 index) override;
 
 	  private:
+		WindowDriver* m_window_driver = nullptr;
 		VkInstance m_instance = VK_NULL_HANDLE;
 		VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
 		VkDevice m_device = VK_NULL_HANDLE;

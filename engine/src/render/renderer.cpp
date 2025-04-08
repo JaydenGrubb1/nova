@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "drivers/dx12/render_driver.h" // IWYU pragma: keep
-#include "drivers/vulkan/render_driver.h" // IWYU pragma: keep
-
 #include <nova/core/debug.h>
 #include <nova/render/renderer.h>
 
@@ -20,20 +17,7 @@ void Renderer::init(const RenderAPI api) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(!s_driver);
 
-	switch (api) {
-#ifdef NOVA_DX12
-		case RenderAPI::DX12:
-			s_driver = std::make_unique<DX12RenderDriver>();
-			break;
-#endif
-#ifdef NOVA_VULKAN
-		case RenderAPI::VULKAN:
-			s_driver = std::make_unique<VulkanRenderDriver>();
-			break;
-#endif
-		default:
-			throw std::runtime_error("Unsupported render API");
-	}
+	s_driver = std::unique_ptr<RenderDriver>(RenderDriver::create(api, nullptr));
 }
 
 void Renderer::shutdown() {

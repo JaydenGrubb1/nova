@@ -9,7 +9,6 @@
 #include "drivers/vulkan/render_driver.h"
 
 #include <nova/core/debug.h>
-#include <nova/platform/system.h>
 #include <nova/version.h>
 #include <vulkan/vulkan.h>
 
@@ -20,7 +19,7 @@
 
 using namespace Nova;
 
-VulkanRenderDriver::VulkanRenderDriver() {
+VulkanRenderDriver::VulkanRenderDriver(WindowDriver* window_driver) : m_window_driver(window_driver) {
 	NOVA_AUTO_TRACE();
 	_check_version();
 	_check_extensions();
@@ -118,7 +117,7 @@ void VulkanRenderDriver::_check_extensions() {
 	u32 count;
 	std::unordered_map<std::string_view, bool> requested; // <extension, required>
 
-	const auto surface_extension = System::get_driver()->get_surface_extension();
+	const auto surface_extension = m_window_driver->get_surface_extension();
 	if (!surface_extension) {
 		throw std::runtime_error("Could not determine required surface extension");
 	}

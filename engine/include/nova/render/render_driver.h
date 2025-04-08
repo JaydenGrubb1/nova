@@ -7,6 +7,7 @@
 #pragma once
 
 #include <nova/api.h>
+#include <nova/platform/window_driver.h>
 #include <nova/render/render_api.h>
 #include <nova/render/render_device.h>
 #include <nova/types.h>
@@ -16,6 +17,7 @@
 namespace Nova {
 	class NOVA_API RenderDriver {
 	  public:
+		static RenderDriver* create(RenderAPI api, WindowDriver* window_driver = nullptr);
 		virtual ~RenderDriver() = default;
 
 		[[nodiscard]] virtual RenderAPI get_api() const = 0;

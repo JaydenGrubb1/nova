@@ -7,7 +7,6 @@
 #pragma once
 
 #include <nova/api.h>
-#include <nova/render/render_driver.h>
 #include <nova/types.h>
 
 #include <string_view>
@@ -17,6 +16,7 @@ namespace Nova {
 
 	class NOVA_API WindowDriver {
 	  public:
+		static WindowDriver* create();
 		virtual ~WindowDriver() = default;
 
 		virtual void poll_events() = 0;
