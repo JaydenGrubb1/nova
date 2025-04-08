@@ -20,6 +20,7 @@ namespace Nova {
 		virtual ~WindowDriver() = default;
 
 		virtual void poll_events() = 0;
+		virtual void beep() = 0;
 
 		virtual WindowID create_window(std::string_view title = "Nova", u32 width = 800, u32 height = 600) = 0;
 		virtual void destroy_window(WindowID window) = 0;

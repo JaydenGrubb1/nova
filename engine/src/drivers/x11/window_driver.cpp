@@ -65,6 +65,10 @@ void X11WindowDriver::poll_events() {
 	}
 }
 
+void X11WindowDriver::beep(){
+	XBell(m_display, 100);
+}
+
 WindowID X11WindowDriver::create_window(std::string_view title, u32 width, u32 height) {
 	NOVA_AUTO_TRACE();
 
@@ -109,7 +113,7 @@ void X11WindowDriver::set_window_position(WindowID id, i32 x, i32 y) {
 }
 
 u32 X11WindowDriver::get_window_count() const {
-	return m_windows.size();
+	return static_cast<u32>(m_windows.size());
 }
 
 const char* X11WindowDriver::get_surface_extension() const {

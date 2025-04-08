@@ -24,6 +24,7 @@ namespace Nova {
 		~X11WindowDriver() override;
 
 		void poll_events() override;
+		void beep() override;
 
 		WindowID create_window(std::string_view title, u32 width, u32 height) override;
 		void destroy_window(WindowID window) override;
