@@ -16,7 +16,7 @@
 namespace Nova {
 	class VulkanRenderDriver final : public RenderDriver {
 	  public:
-		VulkanRenderDriver(WindowDriver* window_driver);
+		explicit VulkanRenderDriver(WindowDriver* window_driver);
 		~VulkanRenderDriver() override;
 
 		[[nodiscard]] RenderAPI get_api() const override;

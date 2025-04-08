@@ -12,7 +12,7 @@
 
 using namespace Nova;
 
-RenderDriver* RenderDriver::create(RenderAPI api, WindowDriver* window_driver) {
+RenderDriver* RenderDriver::create(const RenderAPI api, WindowDriver* window_driver) {
 	NOVA_AUTO_TRACE();
 	switch (api) {
 #ifdef NOVA_DX12

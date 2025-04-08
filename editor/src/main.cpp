@@ -15,8 +15,8 @@ using namespace Nova;
 int main() {
 	Debug::get_logger()->set_level(spdlog::level::trace);
 
-	auto wd = WindowDriver::create();
-	auto rd = RenderDriver::create(RenderAPI::VULKAN, wd);
+	const auto wd = WindowDriver::create();
+	const auto rd = RenderDriver::create(RenderAPI::VULKAN, wd);
 
 	rd->select_device(RenderDevice::AUTO);
 	wd->create_window("Nova", 1280, 720);

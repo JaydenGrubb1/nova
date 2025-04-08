@@ -15,6 +15,8 @@
 
 #include <nova/core/debug.h>
 
+#include <ranges>
+
 using namespace Nova;
 
 X11WindowDriver::X11WindowDriver() {
@@ -31,8 +33,8 @@ X11WindowDriver::X11WindowDriver() {
 X11WindowDriver::~X11WindowDriver() {
 	NOVA_AUTO_TRACE();
 
-	for (const auto& [id, _] : m_windows) {
-		XDestroyWindow(m_display, id);
+	for (const auto window : std::views::keys(m_windows)) {
+		XDestroyWindow(m_display, window);
 	}
 
 	if (m_display) {
@@ -47,15 +49,15 @@ void X11WindowDriver::poll_events() {
 	XEvent event;
 	XNextEvent(m_display, &event);
 
-	WindowID id = event.xany.window;
-	NOVA_ASSERT(m_windows.contains(id));
+	const WindowID window = event.xany.window;
+	NOVA_ASSERT(m_windows.contains(window));
 
 	switch (event.type) {
 		case Expose:
 			break;
 		case ClientMessage: {
 			if (event.xclient.data.l[0] == static_cast<long>(m_window_close_atom)) {
-				destroy_window(id);
+				destroy_window(window);
 			}
 			break;
 		}
@@ -65,15 +67,15 @@ void X11WindowDriver::poll_events() {
 	}
 }
 
-void X11WindowDriver::beep(){
+void X11WindowDriver::beep() {
 	XBell(m_display, 100);
 }
 
-WindowID X11WindowDriver::create_window(std::string_view title, u32 width, u32 height) {
+WindowID X11WindowDriver::create_window(const std::string_view title, const u32 width, const u32 height) {
 	NOVA_AUTO_TRACE();
 
-	WindowID window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, width, height, 0, 0, 0);
-	WindowData& data = m_windows[window];
+	const WindowID window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, width, height, 0, 0, 0);
+	const WindowData& data = m_windows[window];
 	(void)data; // TODO: Initialize window data
 
 	XSetWMProtocols(m_display, window, &m_window_close_atom, 1);
@@ -85,31 +87,31 @@ WindowID X11WindowDriver::create_window(std::string_view title, u32 width, u32 h
 	return window;
 }
 
-void X11WindowDriver::destroy_window(WindowID id) {
+void X11WindowDriver::destroy_window(const WindowID window) {
 	NOVA_AUTO_TRACE();
-	if (!m_windows.contains(id)) {
+	if (!m_windows.contains(window)) {
 		return;
 	}
-	XDestroyWindow(m_display, id);
-	m_windows.erase(id);
+	XDestroyWindow(m_display, window);
+	m_windows.erase(window);
 }
 
-void X11WindowDriver::set_window_title(WindowID id, std::string_view title) {
+void X11WindowDriver::set_window_title(const WindowID window, const std::string_view title) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_windows.contains(id));
-	XStoreName(m_display, id, title.data());
+	NOVA_ASSERT(m_windows.contains(window));
+	XStoreName(m_display, window, title.data());
 }
 
-void X11WindowDriver::set_window_size(WindowID id, u32 width, u32 height) {
+void X11WindowDriver::set_window_size(const WindowID window, const u32 width, const u32 height) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_windows.contains(id));
-	XResizeWindow(m_display, id, width, height);
+	NOVA_ASSERT(m_windows.contains(window));
+	XResizeWindow(m_display, window, width, height);
 }
 
-void X11WindowDriver::set_window_position(WindowID id, i32 x, i32 y) {
+void X11WindowDriver::set_window_position(const WindowID window, const i32 x, const i32 y) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_windows.contains(id));
-	XMoveWindow(m_display, id, x, y);
+	NOVA_ASSERT(m_windows.contains(window));
+	XMoveWindow(m_display, window, x, y);
 }
 
 u32 X11WindowDriver::get_window_count() const {
