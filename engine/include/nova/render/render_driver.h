@@ -27,6 +27,6 @@ namespace Nova {
 
 		[[nodiscard]] virtual u32 get_device_count() const = 0;
 		[[nodiscard]] virtual const RenderDevice& get_device(u32 index) const = 0;
-		virtual void create_device(u32 index) = 0;
+		virtual void select_device(u32 index) = 0;
 	};
 } // namespace Nova

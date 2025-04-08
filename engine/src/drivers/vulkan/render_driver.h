@@ -26,7 +26,7 @@ namespace Nova {
 
 		[[nodiscard]] u32 get_device_count() const override;
 		[[nodiscard]] const RenderDevice& get_device(u32 index) const override;
-		void create_device(u32 index) override;
+		void select_device(u32 index) override;
 
 	  private:
 		WindowDriver* m_window_driver = nullptr;

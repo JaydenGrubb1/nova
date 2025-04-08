@@ -72,7 +72,7 @@ const RenderDevice& VulkanRenderDriver::get_device(const u32 index) const {
 	return m_devices[index];
 }
 
-void VulkanRenderDriver::create_device(u32 index) {
+void VulkanRenderDriver::select_device(u32 index) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(!m_device);
 
