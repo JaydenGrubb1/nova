@@ -9,6 +9,7 @@
 #include "drivers/vulkan/render_driver.h"
 
 #include <nova/core/debug.h>
+#include <nova/platform/window_driver.h>
 #include <nova/version.h>
 #include <vulkan/vulkan.h>
 
@@ -31,10 +32,10 @@ VulkanRenderDriver::VulkanRenderDriver(WindowDriver* window_driver) : m_window_d
 VulkanRenderDriver::~VulkanRenderDriver() {
 	NOVA_AUTO_TRACE();
 	if (m_device) {
-		vkDestroyDevice(m_device, _get_allocator(VK_OBJECT_TYPE_DEVICE));
+		vkDestroyDevice(m_device, get_allocator(VK_OBJECT_TYPE_DEVICE));
 	}
 	if (m_instance) {
-		vkDestroyInstance(m_instance, _get_allocator(VK_OBJECT_TYPE_INSTANCE));
+		vkDestroyInstance(m_instance, get_allocator(VK_OBJECT_TYPE_INSTANCE));
 	}
 }
 
@@ -92,6 +93,31 @@ void VulkanRenderDriver::select_device(u32 index) {
 	std::vector<VkDeviceQueueCreateInfo> queues;
 	_init_queues(queues);
 	_init_device(queues);
+}
+
+SurfaceID VulkanRenderDriver::create_surface(const WindowID window) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(m_instance);
+	NOVA_ASSERT(m_window_driver);
+	return m_window_driver->create_surface(window, this);
+}
+
+void VulkanRenderDriver::destroy_surface(const SurfaceID surface) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(m_instance);
+	SurfaceData* data = reinterpret_cast<SurfaceData*>(surface);
+	vkDestroySurfaceKHR(m_instance, data->handle, get_allocator(VK_OBJECT_TYPE_SURFACE_KHR));
+	delete data;
+}
+
+VkInstance VulkanRenderDriver::get_instance() const {
+	return m_instance;
+}
+
+VkAllocationCallbacks* VulkanRenderDriver::get_allocator(const VkObjectType type) const {
+	// TODO: Add custom allocator
+	(void)type;
+	return nullptr;
 }
 
 void VulkanRenderDriver::_check_version() const {
@@ -206,7 +232,7 @@ void VulkanRenderDriver::_init_instance() {
 	create.enabledExtensionCount = static_cast<u32>(m_extensions.size());
 	create.ppEnabledExtensionNames = m_extensions.data();
 
-	if (vkCreateInstance(&create, _get_allocator(VK_OBJECT_TYPE_INSTANCE), &m_instance) != VK_SUCCESS) {
+	if (vkCreateInstance(&create, get_allocator(VK_OBJECT_TYPE_INSTANCE), &m_instance) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create VkInstance");
 	}
 
@@ -338,17 +364,11 @@ void VulkanRenderDriver::_init_device(const std::vector<VkDeviceQueueCreateInfo>
 	create.pEnabledFeatures = &m_features;
 	// TODO: pNext for additional features
 
-	if (vkCreateDevice(m_physical_device, &create, _get_allocator(VK_OBJECT_TYPE_DEVICE), &m_device) != VK_SUCCESS) {
+	if (vkCreateDevice(m_physical_device, &create, get_allocator(VK_OBJECT_TYPE_DEVICE), &m_device) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create VkDevice");
 	}
 
 	NOVA_LOG("VkDevice created");
-}
-
-VkAllocationCallbacks* VulkanRenderDriver::_get_allocator(const VkObjectType type) {
-	// TODO: Add custom allocator
-	(void)type;
-	return nullptr;
 }
 
 #endif // NOVA_VULKAN

@@ -14,6 +14,11 @@
 #include <vector>
 
 namespace Nova {
+	struct SurfaceData {
+		VkSurfaceKHR handle = VK_NULL_HANDLE;
+		// TODO: Add stuff here
+	};
+
 	class VulkanRenderDriver final : public RenderDriver {
 	  public:
 		explicit VulkanRenderDriver(WindowDriver* window_driver);
@@ -27,6 +32,12 @@ namespace Nova {
 		[[nodiscard]] u32 get_device_count() const override;
 		[[nodiscard]] const RenderDevice& get_device(u32 index) const override;
 		void select_device(u32 index) override;
+
+		[[nodiscard]] SurfaceID create_surface(WindowID window) override;
+		void destroy_surface(SurfaceID surface) override;
+
+		[[nodiscard]] VkInstance get_instance() const;
+		[[nodiscard]] VkAllocationCallbacks* get_allocator(VkObjectType type) const;
 
 	  private:
 		WindowDriver* m_window_driver = nullptr;
@@ -50,8 +61,6 @@ namespace Nova {
 		void _check_device_features();
 		void _init_queues(std::vector<VkDeviceQueueCreateInfo>& queues) const;
 		void _init_device(const std::vector<VkDeviceQueueCreateInfo>& queues);
-
-		static VkAllocationCallbacks* _get_allocator(VkObjectType type);
 	};
 } // namespace Nova
 

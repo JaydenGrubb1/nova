@@ -13,6 +13,9 @@
 
 namespace Nova {
 	using WindowID = uptr;
+	using SurfaceID = uptr;
+
+	class RenderDriver;
 
 	class NOVA_API WindowDriver {
 	  public:
@@ -22,15 +25,15 @@ namespace Nova {
 		virtual void poll_events() = 0;
 		virtual void beep() = 0;
 
-		virtual WindowID create_window(std::string_view title, u32 width, u32 height) = 0;
+		[[nodiscard]] virtual u32 get_window_count() const = 0;
+		[[nodiscard]] virtual WindowID create_window(std::string_view title, u32 width, u32 height) = 0;
 		virtual void destroy_window(WindowID window) = 0;
 
 		virtual void set_window_title(WindowID window, std::string_view title) = 0;
 		virtual void set_window_size(WindowID window, u32 width, u32 height) = 0;
 		virtual void set_window_position(WindowID window, i32 x, i32 y) = 0;
 
-		[[nodiscard]] virtual u32 get_window_count() const = 0;
-
 		[[nodiscard]] virtual const char* get_surface_extension() const = 0;
+		[[nodiscard]] virtual SurfaceID create_surface(WindowID window, RenderDriver* render_driver) = 0;
 	};
 } // namespace Nova

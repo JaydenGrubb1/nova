@@ -9,6 +9,8 @@
 #include "drivers/x11/window_driver.h"
 
 #ifdef NOVA_VULKAN
+#include "drivers/vulkan/render_driver.h"
+
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_xlib.h>
 #endif
@@ -71,6 +73,10 @@ void X11WindowDriver::beep() {
 	XBell(m_display, 100);
 }
 
+u32 X11WindowDriver::get_window_count() const {
+	return static_cast<u32>(m_windows.size());
+}
+
 WindowID X11WindowDriver::create_window(const std::string_view title, const u32 width, const u32 height) {
 	NOVA_AUTO_TRACE();
 
@@ -114,15 +120,36 @@ void X11WindowDriver::set_window_position(const WindowID window, const i32 x, co
 	XMoveWindow(m_display, window, x, y);
 }
 
-u32 X11WindowDriver::get_window_count() const {
-	return static_cast<u32>(m_windows.size());
-}
-
 const char* X11WindowDriver::get_surface_extension() const {
 #ifdef NOVA_VULKAN
 	return VK_KHR_XLIB_SURFACE_EXTENSION_NAME;
 #else
 	return nullptr;
+#endif
+}
+
+SurfaceID X11WindowDriver::create_surface(const WindowID window, RenderDriver* render_driver) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(m_windows.contains(window));
+	NOVA_ASSERT(render_driver);
+	NOVA_ASSERT(render_driver->get_api() == RenderAPI::VULKAN);
+
+#ifdef NOVA_VULKAN
+	VkXlibSurfaceCreateInfoKHR create {};
+	create.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+	create.dpy = m_display;
+	create.window = static_cast<Window>(window);
+
+	const auto vkrd = static_cast<VulkanRenderDriver*>(render_driver);
+	SurfaceData* surface = new SurfaceData();
+
+	if (vkCreateXlibSurfaceKHR(vkrd->get_instance(), &create, vkrd->get_allocator(VK_OBJECT_TYPE_SURFACE_KHR), &surface->handle)
+		!= VK_SUCCESS) {
+		throw std::runtime_error("Failed to create Vulkan surface");
+	}
+	return reinterpret_cast<SurfaceID>(surface);
+#else
+	return SurfaceID();
 #endif
 }
 

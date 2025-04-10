@@ -26,16 +26,16 @@ namespace Nova {
 		void poll_events() override;
 		void beep() override;
 
-		WindowID create_window(std::string_view title, u32 width, u32 height) override;
+		[[nodiscard]] u32 get_window_count() const override;
+		[[nodiscard]] WindowID create_window(std::string_view title, u32 width, u32 height) override;
 		void destroy_window(WindowID window) override;
 
 		void set_window_title(WindowID window, std::string_view title) override;
 		void set_window_size(WindowID window, u32 width, u32 height) override;
 		void set_window_position(WindowID window, i32 x, i32 y) override;
 
-		[[nodiscard]] u32 get_window_count() const override;
-
 		[[nodiscard]] const char* get_surface_extension() const override;
+		[[nodiscard]] SurfaceID create_surface(WindowID window, RenderDriver* render_driver) override;
 
 	  private:
 		Display* m_display = nullptr;
