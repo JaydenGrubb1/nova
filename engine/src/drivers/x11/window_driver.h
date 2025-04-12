@@ -15,7 +15,8 @@
 
 namespace Nova {
 	struct WindowData {
-		// TODO: Add stuff here
+		int width = 0;
+		int height = 0;
 	};
 
 	class X11WindowDriver final : public WindowDriver {

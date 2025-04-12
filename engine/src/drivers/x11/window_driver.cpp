@@ -16,6 +16,7 @@
 #endif
 
 #include <nova/core/debug.h>
+#include <nova/render/render_driver.h>
 
 #include <ranges>
 
@@ -46,26 +47,38 @@ X11WindowDriver::~X11WindowDriver() {
 }
 
 void X11WindowDriver::poll_events() {
-	NOVA_AUTO_TRACE();
+	while (XPending(m_display)) {
+		XEvent event;
+		XNextEvent(m_display, &event);
 
-	XEvent event;
-	XNextEvent(m_display, &event);
+		const WindowID window = event.xany.window;
+		WindowData& data = m_windows[window];
 
-	const WindowID window = event.xany.window;
-	NOVA_ASSERT(m_windows.contains(window));
-
-	switch (event.type) {
-		case Expose:
-			break;
-		case ClientMessage: {
-			if (event.xclient.data.l[0] == static_cast<long>(m_window_close_atom)) {
-				destroy_window(window);
+		switch (event.type) {
+			case ConfigureNotify: {
+				XConfigureEvent xce = event.xconfigure;
+				if (xce.width != data.width || xce.height != data.height) {
+					data.width = xce.width;
+					data.height = xce.height;
+					NOVA_DEBUG("Window event: RESIZED ({}x{})", xce.width, xce.height);
+				}
+				break;
 			}
-			break;
+			case ClientMessage: {
+				if (event.xclient.data.l[0] == static_cast<long>(m_window_close_atom)) {
+					NOVA_DEBUG("Window event: CLOSED");
+					destroy_window(window);
+				}
+				break;
+			}
+			case MapNotify:
+			case ReparentNotify:
+				// Ignore these events
+				break;
+			default:
+				NOVA_WARN("Unhandled X11 event: {}", event.type);
+				break;
 		}
-		default:
-			NOVA_WARN("Unhandled X11 event: {}", event.type);
-			break;
 	}
 }
 
@@ -81,11 +94,12 @@ WindowID X11WindowDriver::create_window(const std::string_view title, const u32 
 	NOVA_AUTO_TRACE();
 
 	const WindowID window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, width, height, 0, 0, 0);
-	const WindowData& data = m_windows[window];
-	(void)data; // TODO: Initialize window data
+	WindowData& data = m_windows[window];
+	data.width = width;
+	data.height = height;
 
 	XSetWMProtocols(m_display, window, &m_window_close_atom, 1);
-	XSelectInput(m_display, window, ExposureMask);
+	XSelectInput(m_display, window, StructureNotifyMask);
 	XStoreName(m_display, window, title.data());
 	XMapWindow(m_display, window);
 	XFlush(m_display);
@@ -147,9 +161,10 @@ SurfaceID X11WindowDriver::create_surface(const WindowID window, RenderDriver* r
 		!= VK_SUCCESS) {
 		throw std::runtime_error("Failed to create Vulkan surface");
 	}
-	return reinterpret_cast<SurfaceID>(surface);
+
+	return SurfaceID(surface);
 #else
-	return SurfaceID();
+	return SurfaceID(nullptr);
 #endif
 }
 

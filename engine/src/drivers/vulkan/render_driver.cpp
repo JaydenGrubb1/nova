@@ -97,14 +97,12 @@ void VulkanRenderDriver::select_device(u32 index) {
 
 SurfaceID VulkanRenderDriver::create_surface(const WindowID window) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_instance);
 	NOVA_ASSERT(m_window_driver);
 	return m_window_driver->create_surface(window, this);
 }
 
 void VulkanRenderDriver::destroy_surface(const SurfaceID surface) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_instance);
 	SurfaceData* data = reinterpret_cast<SurfaceData*>(surface);
 	vkDestroySurfaceKHR(m_instance, data->handle, get_allocator(VK_OBJECT_TYPE_SURFACE_KHR));
 	delete data;

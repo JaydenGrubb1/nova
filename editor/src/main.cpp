@@ -15,15 +15,22 @@ using namespace Nova;
 int main() {
 	Debug::get_logger()->set_level(spdlog::level::trace);
 
-	const auto wd = WindowDriver::create();
-	const auto rd = RenderDriver::create(RenderAPI::VULKAN, wd);
+	auto wd = WindowDriver::create();
+	auto rd = RenderDriver::create(RenderAPI::VULKAN, wd);
 
+	auto window = wd->create_window("Nova", 1280, 720);
+	auto surface = rd->create_surface(window);
+
+	// TODO: select_device should probably consider what surface is
+	// being used as not all devices support all surfaces. alternatively
+	// the caller chould check if the device supports the surface
 	rd->select_device(RenderDevice::AUTO);
-	wd->create_window("Nova", 1280, 720);
 
 	while (wd->get_window_count() > 0) {
 		wd->poll_events();
 	}
+
+	rd->destroy_surface(surface);
 
 	delete rd;
 	delete wd;
