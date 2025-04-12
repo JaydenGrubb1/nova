@@ -100,7 +100,7 @@ void VulkanRenderDriver::select_device(u32 index) {
 
 	_check_device_extensions();
 	_check_device_features();
-	// TODO: Check device capabilities
+	_check_device_capabilities();
 
 	std::vector<VkDeviceQueueCreateInfo> queues;
 	_init_queues(queues);
@@ -323,6 +323,12 @@ void VulkanRenderDriver::_check_device_features() {
 	// TODO: Disable unwanted features
 
 	NOVA_WARN("{}() not implemented", NOVA_FUNC_NAME);
+}
+
+void VulkanRenderDriver::_check_device_capabilities() {
+	NOVA_AUTO_TRACE();
+	NOVA_WARN("{}() not implemented", NOVA_FUNC_NAME);
+	// TODO: Check device capabilities
 }
 
 void VulkanRenderDriver::_init_queues(std::vector<VkDeviceQueueCreateInfo>& queues) const {

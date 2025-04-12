@@ -60,6 +60,7 @@ namespace Nova {
 
 		void _check_device_extensions();
 		void _check_device_features();
+		void _check_device_capabilities();
 		void _init_queues(std::vector<VkDeviceQueueCreateInfo>& queues) const;
 		void _init_device(const std::vector<VkDeviceQueueCreateInfo>& queues);
 	};
