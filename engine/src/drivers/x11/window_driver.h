@@ -24,6 +24,9 @@ namespace Nova {
 		X11WindowDriver();
 		~X11WindowDriver() override;
 
+		[[nodiscard]] WindowAPI get_api() const override;
+		[[nodiscard]] std::string get_api_name() const override;
+
 		void poll_events() override;
 		void beep() override;
 

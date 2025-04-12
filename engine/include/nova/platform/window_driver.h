@@ -7,6 +7,7 @@
 #pragma once
 
 #include <nova/api.h>
+#include <nova/platform/window_api.h>
 #include <nova/types.h>
 
 #include <string_view>
@@ -21,6 +22,9 @@ namespace Nova {
 	  public:
 		static WindowDriver* create();
 		virtual ~WindowDriver() = default;
+
+		[[nodiscard]] virtual WindowAPI get_api() const = 0;
+		[[nodiscard]] virtual std::string get_api_name() const = 0;
 
 		virtual void poll_events() = 0;
 		virtual void beep() = 0;

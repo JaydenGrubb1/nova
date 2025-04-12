@@ -46,6 +46,14 @@ X11WindowDriver::~X11WindowDriver() {
 	}
 }
 
+WindowAPI X11WindowDriver::get_api() const {
+	return WindowAPI::X11;
+}
+
+std::string X11WindowDriver::get_api_name() const {
+	return "X11";
+}
+
 void X11WindowDriver::poll_events() {
 	while (XPending(m_display)) {
 		XEvent event;
