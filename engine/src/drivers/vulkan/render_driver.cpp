@@ -10,6 +10,7 @@
 
 #include <nova/core/debug.h>
 #include <nova/platform/window_driver.h>
+#include <nova/render/render_device.h>
 #include <nova/version.h>
 #include <vulkan/vulkan.h>
 
@@ -73,15 +74,26 @@ const RenderDevice& VulkanRenderDriver::get_device(const u32 index) const {
 	return m_devices[index];
 }
 
+bool VulkanRenderDriver::get_device_supports_surface(const u32 index, const SurfaceID surface) const {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(index < m_devices.size());
+	NOVA_ASSERT(surface);
+
+	// TODO: Check other queue families?
+
+	SurfaceData* data = reinterpret_cast<SurfaceData*>(surface);
+	VkBool32 supported = false;
+	if (vkGetPhysicalDeviceSurfaceSupportKHR(static_cast<VkPhysicalDevice>(m_devices[index].handle), 0, data->handle, &supported)
+		!= VK_SUCCESS) {
+		return false;
+	}
+	return supported;
+}
+
 void VulkanRenderDriver::select_device(u32 index) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(!m_device);
-
-	if (index == RenderDevice::AUTO) {
-		index = RenderDevice::choose_device(m_devices);
-	} else {
-		NOVA_ASSERT(index < m_devices.size());
-	}
+	NOVA_ASSERT(index < m_devices.size());
 
 	NOVA_LOG("Using device: {}", m_devices[index].name);
 	m_physical_device = static_cast<VkPhysicalDevice>(m_devices[index].handle);

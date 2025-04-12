@@ -31,6 +31,7 @@ namespace Nova {
 
 		[[nodiscard]] u32 get_device_count() const override;
 		[[nodiscard]] const RenderDevice& get_device(u32 index) const override;
+		[[nodiscard]] bool get_device_supports_surface(u32 index, SurfaceID surface) const override;
 		void select_device(u32 index) override;
 
 		[[nodiscard]] SurfaceID create_surface(WindowID window) override;

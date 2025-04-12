@@ -6,18 +6,31 @@
 
 #include <nova/core/debug.h>
 #include <nova/render/render_device.h>
+#include <nova/render/render_driver.h>
 
 using namespace Nova;
 
-u32 RenderDevice::choose_device(const std::vector<RenderDevice>& devices) {
+u32 RenderDevice::choose_device(RenderDriver* driver, std::span<const SurfaceID> surfaces) {
 	NOVA_AUTO_TRACE();
 
-	u32 best_index = 0;
+	u32 best_index = -1;
 	u32 best_score = 0;
 
-	for (u32 i = 0; i < devices.size(); i++) {
-		u32 score = 0;
-		switch (devices[i].type) {
+	for (u32 i = 0; i < driver->get_device_count(); i++) {
+		auto& device = driver->get_device(i);
+		u32 score = 1;
+
+		for (SurfaceID surface : surfaces) {
+			if (!driver->get_device_supports_surface(i, surface)) {
+				score = 0;
+				break;
+			}
+		}
+		if (score == 0) {
+			continue;
+		}
+
+		switch (device.type) {
 			case Type::DISCRETE:
 				score += 4;
 				break;
@@ -33,10 +46,15 @@ u32 RenderDevice::choose_device(const std::vector<RenderDevice>& devices) {
 			default:
 				break;
 		}
+
 		if (score > best_score) {
 			best_index = i;
 			best_score = score;
 		}
+	}
+
+	if (best_index == -1U) {
+		throw std::runtime_error("No suitable render device found");
 	}
 
 	return best_index;

@@ -8,7 +8,6 @@
 
 #include <nova/api.h>
 #include <nova/render/render_api.h>
-#include <nova/render/render_device.h>
 #include <nova/types.h>
 
 #include <string>
@@ -17,6 +16,7 @@ namespace Nova {
 	using WindowID = uptr;
 	using SurfaceID = uptr;
 
+	struct RenderDevice;
 	class WindowDriver;
 
 	class NOVA_API RenderDriver {
@@ -31,6 +31,7 @@ namespace Nova {
 
 		[[nodiscard]] virtual u32 get_device_count() const = 0;
 		[[nodiscard]] virtual const RenderDevice& get_device(u32 index) const = 0;
+		[[nodiscard]] virtual bool get_device_supports_surface(u32 index, SurfaceID surface) const = 0;
 		virtual void select_device(u32 index) = 0;
 
 		[[nodiscard]] virtual SurfaceID create_surface(WindowID window) = 0;
