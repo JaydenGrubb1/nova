@@ -8,6 +8,7 @@ project(nova)
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 # Configuration Options
 set(NOVA_BUILD_ENGINE ON CACHE BOOL "Build the engine")
