@@ -7,5 +7,5 @@
 #pragma once
 
 namespace Nova {
-	enum class WindowAPI { WAYLAND, WIN32, X11 };
+	enum class WindowAPI { WAYLAND, WINDOWS, X11 };
 } // namespace Nova
