@@ -39,7 +39,7 @@ namespace Nova {
 		void set_window_position(WindowID window, i32 x, i32 y) override;
 
 		[[nodiscard]] const char* get_surface_extension() const override;
-		[[nodiscard]] SurfaceID create_surface(WindowID window, RenderDriver* render_driver) override;
+		[[nodiscard]] SurfaceID create_surface(WindowID window, RenderDriver* driver) override;
 
 	  private:
 		Display* m_display = nullptr;

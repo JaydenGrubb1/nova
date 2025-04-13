@@ -38,6 +38,6 @@ namespace Nova {
 		virtual void set_window_position(WindowID window, i32 x, i32 y) = 0;
 
 		[[nodiscard]] virtual const char* get_surface_extension() const = 0;
-		[[nodiscard]] virtual SurfaceID create_surface(WindowID window, RenderDriver* render_driver) = 0;
+		[[nodiscard]] virtual SurfaceID create_surface(WindowID window, RenderDriver* driver) = 0;
 	};
 } // namespace Nova

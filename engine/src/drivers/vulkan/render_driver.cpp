@@ -21,7 +21,7 @@
 
 using namespace Nova;
 
-VulkanRenderDriver::VulkanRenderDriver(WindowDriver* window_driver) : m_window_driver(window_driver) {
+VulkanRenderDriver::VulkanRenderDriver(WindowDriver* p_driver) : m_window_driver(p_driver) {
 	NOVA_AUTO_TRACE();
 	_check_version();
 	_check_extensions();
@@ -69,34 +69,39 @@ u32 VulkanRenderDriver::get_device_count() const {
 	return static_cast<u32>(m_devices.size());
 }
 
-const RenderDevice& VulkanRenderDriver::get_device(const u32 index) const {
-	NOVA_ASSERT(index < m_devices.size());
-	return m_devices[index];
+const RenderDevice& VulkanRenderDriver::get_device(const u32 p_index) const {
+	NOVA_ASSERT(p_index < m_devices.size());
+	return m_devices[p_index];
 }
 
-bool VulkanRenderDriver::get_device_supports_surface(const u32 index, const SurfaceID surface) const {
+bool VulkanRenderDriver::get_device_supports_surface(const u32 p_index, const SurfaceID p_surface) const {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(index < m_devices.size());
-	NOVA_ASSERT(surface);
+	NOVA_ASSERT(p_index < m_devices.size());
+	NOVA_ASSERT(p_surface);
 
 	// TODO: Check other queue families?
 
-	SurfaceData* data = reinterpret_cast<SurfaceData*>(surface);
+	SurfaceData* data = reinterpret_cast<SurfaceData*>(p_surface);
 	VkBool32 supported = false;
-	if (vkGetPhysicalDeviceSurfaceSupportKHR(static_cast<VkPhysicalDevice>(m_devices[index].handle), 0, data->handle, &supported)
+	if (vkGetPhysicalDeviceSurfaceSupportKHR(
+			static_cast<VkPhysicalDevice>(m_devices[p_index].handle),
+			0,
+			data->handle,
+			&supported
+		)
 		!= VK_SUCCESS) {
 		return false;
 	}
 	return supported;
 }
 
-void VulkanRenderDriver::select_device(u32 index) {
+void VulkanRenderDriver::select_device(u32 p_index) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(!m_device);
-	NOVA_ASSERT(index < m_devices.size());
+	NOVA_ASSERT(p_index < m_devices.size());
 
-	NOVA_LOG("Using device: {}", m_devices[index].name);
-	m_physical_device = static_cast<VkPhysicalDevice>(m_devices[index].handle);
+	NOVA_LOG("Using device: {}", m_devices[p_index].name);
+	m_physical_device = static_cast<VkPhysicalDevice>(m_devices[p_index].handle);
 
 	_check_device_extensions();
 	_check_device_features();
@@ -107,15 +112,15 @@ void VulkanRenderDriver::select_device(u32 index) {
 	_init_device(queues);
 }
 
-SurfaceID VulkanRenderDriver::create_surface(const WindowID window) {
+SurfaceID VulkanRenderDriver::create_surface(const WindowID p_window) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(m_window_driver);
-	return m_window_driver->create_surface(window, this);
+	return m_window_driver->create_surface(p_window, this);
 }
 
-void VulkanRenderDriver::destroy_surface(const SurfaceID surface) {
+void VulkanRenderDriver::destroy_surface(const SurfaceID p_surface) {
 	NOVA_AUTO_TRACE();
-	SurfaceData* data = reinterpret_cast<SurfaceData*>(surface);
+	SurfaceData* data = reinterpret_cast<SurfaceData*>(p_surface);
 	vkDestroySurfaceKHR(m_instance, data->handle, get_allocator(VK_OBJECT_TYPE_SURFACE_KHR));
 	delete data;
 }
@@ -124,9 +129,9 @@ VkInstance VulkanRenderDriver::get_instance() const {
 	return m_instance;
 }
 
-VkAllocationCallbacks* VulkanRenderDriver::get_allocator(const VkObjectType type) const {
+VkAllocationCallbacks* VulkanRenderDriver::get_allocator(const VkObjectType p_type) const {
 	// TODO: Add custom allocator
-	(void)type;
+	(void)p_type;
 	return nullptr;
 }
 
@@ -331,7 +336,7 @@ void VulkanRenderDriver::_check_device_capabilities() {
 	// TODO: Check device capabilities
 }
 
-void VulkanRenderDriver::_init_queues(std::vector<VkDeviceQueueCreateInfo>& queues) const {
+void VulkanRenderDriver::_init_queues(std::vector<VkDeviceQueueCreateInfo>& p_queues) const {
 	NOVA_AUTO_TRACE();
 
 	u32 count;
@@ -339,12 +344,12 @@ void VulkanRenderDriver::_init_queues(std::vector<VkDeviceQueueCreateInfo>& queu
 	std::vector<VkQueueFamilyProperties> available(count);
 	vkGetPhysicalDeviceQueueFamilyProperties(m_physical_device, &count, available.data());
 
-	constexpr VkQueueFlags mask = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
-	static float priority = 1.0f;
+	constexpr VkQueueFlags QUEUE_MASK = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
+	static float s_priority = 1.0f;
 	VkQueueFlags found = 0;
 
 	for (u32 i = 0; i < count; i++) {
-		if ((available[i].queueFlags & mask) == 0) {
+		if ((available[i].queueFlags & QUEUE_MASK) == 0) {
 			continue;
 		}
 		if (!available[i].queueCount) {
@@ -354,19 +359,21 @@ void VulkanRenderDriver::_init_queues(std::vector<VkDeviceQueueCreateInfo>& queu
 		NOVA_LOG("Using queue family: {}", i);
 		found |= available[i].queueFlags;
 
-		queues.emplace_back();
-		queues.back().sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queues.back().queueFamilyIndex = i;
-		queues.back().queueCount = 1; // TODO: Does it make sense to have more than one queue?
-		queues.back().pQueuePriorities = &priority;
+		VkDeviceQueueCreateInfo queue {};
+		queue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queue.queueFamilyIndex = i;
+		queue.queueCount = 1;
+		queue.pQueuePriorities = &s_priority;
+
+		p_queues.push_back(queue);
 	}
 
-	if ((found & mask) != mask) {
-		throw std::runtime_error("Failed to find required queue family");
+	if ((found & QUEUE_MASK) != QUEUE_MASK) {
+		throw std::runtime_error("Failed to find all required queue families");
 	}
 }
 
-void VulkanRenderDriver::_init_device(const std::vector<VkDeviceQueueCreateInfo>& queues) {
+void VulkanRenderDriver::_init_device(const std::vector<VkDeviceQueueCreateInfo>& p_queues) {
 	NOVA_AUTO_TRACE();
 
 	VkDeviceCreateInfo create {};
@@ -375,8 +382,8 @@ void VulkanRenderDriver::_init_device(const std::vector<VkDeviceQueueCreateInfo>
 	create.ppEnabledLayerNames = m_layers.data();
 	create.enabledExtensionCount = static_cast<u32>(m_device_extensions.size());
 	create.ppEnabledExtensionNames = m_device_extensions.data();
-	create.queueCreateInfoCount = static_cast<u32>(queues.size());
-	create.pQueueCreateInfos = queues.data();
+	create.queueCreateInfoCount = static_cast<u32>(p_queues.size());
+	create.pQueueCreateInfos = p_queues.data();
 	create.pEnabledFeatures = &m_features;
 	// TODO: pNext for additional features
 

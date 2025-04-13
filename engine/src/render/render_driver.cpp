@@ -12,16 +12,16 @@
 
 using namespace Nova;
 
-RenderDriver* RenderDriver::create(const RenderAPI api, WindowDriver* window_driver) {
+RenderDriver* RenderDriver::create(const RenderAPI p_api, WindowDriver* p_driver) {
 	NOVA_AUTO_TRACE();
-	switch (api) {
+	switch (p_api) {
 #ifdef NOVA_DX12
 		case RenderAPI::DX12:
 			return new DX12RenderDriver();
 #endif
 #ifdef NOVA_VULKAN
 		case RenderAPI::VULKAN:
-			return new VulkanRenderDriver(window_driver);
+			return new VulkanRenderDriver(p_driver);
 #endif
 		default:
 			throw std::runtime_error("Unsupported render API");

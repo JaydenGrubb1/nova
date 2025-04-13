@@ -26,13 +26,13 @@ bool Debug::is_debug() {
 #endif
 }
 
-void Internals::_assert_fail(std::string_view assertion, std::string_view file, std::string_view func, int line) {
+void Internals::_assert_fail(std::string_view p_assertion, std::string_view p_file, std::string_view p_func, int p_line) {
 	Debug::get_logger()->critical(
 		"ASSERTION FAILED\n Assertion: \"{}\"\n File:      \"{}\" (line {})\n Function:  {}()",
-		assertion,
-		file,
-		line,
-		func
+		p_assertion,
+		p_file,
+		p_line,
+		p_func
 	);
 	std::abort();
 }

@@ -10,18 +10,18 @@
 
 using namespace Nova;
 
-u32 RenderDevice::choose_device(RenderDriver* driver, std::span<const SurfaceID> surfaces) {
+u32 RenderDevice::choose_device(RenderDriver* p_driver, std::span<const SurfaceID> p_surfaces) {
 	NOVA_AUTO_TRACE();
 
 	u32 best_index = -1;
 	u32 best_score = 0;
 
-	for (u32 i = 0; i < driver->get_device_count(); i++) {
-		auto& device = driver->get_device(i);
+	for (u32 i = 0; i < p_driver->get_device_count(); i++) {
+		auto& device = p_driver->get_device(i);
 		u32 score = 1;
 
-		for (SurfaceID surface : surfaces) {
-			if (!driver->get_device_supports_surface(i, surface)) {
+		for (SurfaceID surface : p_surfaces) {
+			if (!p_driver->get_device_supports_surface(i, surface)) {
 				score = 0;
 				break;
 			}
