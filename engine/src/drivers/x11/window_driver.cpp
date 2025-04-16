@@ -36,7 +36,7 @@ X11WindowDriver::X11WindowDriver() {
 X11WindowDriver::~X11WindowDriver() {
 	NOVA_AUTO_TRACE();
 
-	for (const auto window : std::views::keys(m_windows)) {
+	for (X11::Window window : std::views::keys(m_windows)) {
 		XDestroyWindow(m_display, window);
 	}
 
@@ -59,15 +59,15 @@ void X11WindowDriver::poll_events() {
 		XEvent event;
 		XNextEvent(m_display, &event);
 
-		const WindowID window = event.xany.window;
-		WindowData& data = m_windows[window];
+		X11::Window handle = event.xany.window;
+		Nova::Window& window = m_windows[handle];
 
 		switch (event.type) {
 			case ConfigureNotify: {
 				XConfigureEvent xce = event.xconfigure;
-				if (xce.width != data.width || xce.height != data.height) {
-					data.width = xce.width;
-					data.height = xce.height;
+				if (xce.width != window.width || xce.height != window.height) {
+					window.width = xce.width;
+					window.height = xce.height;
 					NOVA_DEBUG("Window event: RESIZED ({}x{})", xce.width, xce.height);
 				}
 				break;
@@ -75,10 +75,12 @@ void X11WindowDriver::poll_events() {
 			case ClientMessage: {
 				if (event.xclient.data.l[0] == static_cast<long>(m_window_close_atom)) {
 					NOVA_DEBUG("Window event: CLOSED");
-					destroy_window(window);
+					destroy_window(&window);
 				}
 				break;
 			}
+			case DestroyNotify:
+			case UnmapNotify:
 			case MapNotify:
 			case ReparentNotify:
 				// Ignore these events
@@ -101,45 +103,45 @@ u32 X11WindowDriver::get_window_count() const {
 WindowID X11WindowDriver::create_window(const std::string_view p_title, const u32 p_width, const u32 p_height) {
 	NOVA_AUTO_TRACE();
 
-	const WindowID window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, p_width, p_height, 0, 0, 0);
-	WindowData& data = m_windows[window];
-	data.width = p_width;
-	data.height = p_height;
+	X11::Window handle = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, p_width, p_height, 0, 0, 0);
 
-	XSetWMProtocols(m_display, window, &m_window_close_atom, 1);
-	XSelectInput(m_display, window, StructureNotifyMask);
-	XStoreName(m_display, window, p_title.data());
-	XMapWindow(m_display, window);
+	Nova::Window& window = m_windows[handle];
+	window.width = p_width;
+	window.height = p_height;
+	window.handle = handle;
+
+	XSetWMProtocols(m_display, handle, &m_window_close_atom, 1);
+	XSelectInput(m_display, handle, StructureNotifyMask);
+	XStoreName(m_display, handle, p_title.data());
+	XMapWindow(m_display, handle);
 	XFlush(m_display);
 
-	return window;
+	return &window;
 }
 
-void X11WindowDriver::destroy_window(const WindowID p_window) {
+void X11WindowDriver::destroy_window(WindowID p_window) {
 	NOVA_AUTO_TRACE();
-	if (!m_windows.contains(p_window)) {
-		return;
-	}
-	XDestroyWindow(m_display, p_window);
-	m_windows.erase(p_window);
+	NOVA_ASSERT(p_window);
+	XDestroyWindow(m_display, p_window->handle);
+	m_windows.erase(p_window->handle);
 }
 
-void X11WindowDriver::set_window_title(const WindowID p_window, const std::string_view p_title) {
+void X11WindowDriver::set_window_title(WindowID p_window, const std::string_view p_title) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_windows.contains(p_window));
-	XStoreName(m_display, p_window, p_title.data());
+	NOVA_ASSERT(p_window);
+	XStoreName(m_display, p_window->handle, p_title.data());
 }
 
-void X11WindowDriver::set_window_size(const WindowID p_window, const u32 p_width, const u32 p_height) {
+void X11WindowDriver::set_window_size(WindowID p_window, const u32 p_width, const u32 p_height) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_windows.contains(p_window));
-	XResizeWindow(m_display, p_window, p_width, p_height);
+	NOVA_ASSERT(p_window);
+	XResizeWindow(m_display, p_window->handle, p_width, p_height);
 }
 
-void X11WindowDriver::set_window_position(const WindowID p_window, const i32 p_x, const i32 p_y) {
+void X11WindowDriver::set_window_position(WindowID p_window, const i32 p_x, const i32 p_y) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_windows.contains(p_window));
-	XMoveWindow(m_display, p_window, p_x, p_y);
+	NOVA_ASSERT(p_window);
+	XMoveWindow(m_display, p_window->handle, p_x, p_y);
 }
 
 const char* X11WindowDriver::get_surface_extension() const {
@@ -150,9 +152,9 @@ const char* X11WindowDriver::get_surface_extension() const {
 #endif
 }
 
-SurfaceID X11WindowDriver::create_surface(const WindowID p_window, RenderDriver* p_driver) {
+SurfaceID X11WindowDriver::create_surface(WindowID p_window, RenderDriver* p_driver) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_windows.contains(p_window));
+	NOVA_ASSERT(p_window);
 	NOVA_ASSERT(p_driver);
 	NOVA_ASSERT(p_driver->get_api() == RenderAPI::VULKAN);
 
@@ -160,19 +162,19 @@ SurfaceID X11WindowDriver::create_surface(const WindowID p_window, RenderDriver*
 	VkXlibSurfaceCreateInfoKHR create {};
 	create.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
 	create.dpy = m_display;
-	create.window = static_cast<Window>(p_window);
+	create.window = p_window->handle;
 
 	const auto vkrd = static_cast<VulkanRenderDriver*>(p_driver);
-	SurfaceData* surface = new SurfaceData();
+	Surface* surface = new Surface();
 
 	if (vkCreateXlibSurfaceKHR(vkrd->get_instance(), &create, vkrd->get_allocator(VK_OBJECT_TYPE_SURFACE_KHR), &surface->handle)
 		!= VK_SUCCESS) {
 		throw std::runtime_error("Failed to create Vulkan surface");
 	}
 
-	return SurfaceID(surface);
+	return surface;
 #else
-	return SurfaceID(nullptr);
+	return nullptr;
 #endif
 }
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include <nova/api.h>
+#include <nova/render/render_fwd.h>
 #include <nova/types.h>
 
 #include <initializer_list>
@@ -14,10 +15,6 @@
 #include <string>
 
 namespace Nova {
-	using SurfaceID = uptr;
-
-	class RenderDriver;
-
 	struct NOVA_API RenderDevice {
 		enum class Vendor { UNKNOWN = 0, INTEL = 0x8086, AMD = 0x1002, NVIDIA = 0x10de };
 		enum class Type { OTHER = 0, INTEGRATED = 1, DISCRETE = 2, VIRTUAL = 3, CPU = 4 };
@@ -29,7 +26,7 @@ namespace Nova {
 		void* handle;
 
 		static u32 choose_device(RenderDriver* driver, std::span<const SurfaceID> surfaces = {});
-		static u32 choose_device(RenderDriver* driver, std::initializer_list<SurfaceID> surfaces) {
+		static u32 choose_device(RenderDriver* driver, std::initializer_list<const SurfaceID> surfaces) {
 			return choose_device(driver, {surfaces.begin(), surfaces.end()});
 		}
 		static u32 choose_device(RenderDriver* driver, SurfaceID surface) {

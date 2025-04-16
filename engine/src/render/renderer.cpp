@@ -5,6 +5,7 @@
  */
 
 #include <nova/core/debug.h>
+#include <nova/render/render_driver.h>
 #include <nova/render/renderer.h>
 
 #include <memory>

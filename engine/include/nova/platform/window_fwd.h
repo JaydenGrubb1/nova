@@ -8,4 +8,9 @@
 
 namespace Nova {
 	enum class WindowAPI { WAYLAND, WINDOWS, X11 };
+
+	class WindowDriver;
+
+	struct Window;
+	using WindowID = Window*;
 } // namespace Nova

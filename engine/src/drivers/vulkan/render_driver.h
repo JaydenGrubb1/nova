@@ -14,9 +14,8 @@
 #include <vector>
 
 namespace Nova {
-	struct SurfaceData {
+	struct Surface {
 		VkSurfaceKHR handle = VK_NULL_HANDLE;
-		// TODO: Add stuff here
 	};
 
 	class VulkanRenderDriver final : public RenderDriver {

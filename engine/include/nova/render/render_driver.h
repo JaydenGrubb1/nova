@@ -7,18 +7,13 @@
 #pragma once
 
 #include <nova/api.h>
-#include <nova/render/render_api.h>
+#include <nova/platform/window_fwd.h>
+#include <nova/render/render_fwd.h>
 #include <nova/types.h>
 
 #include <string>
 
 namespace Nova {
-	using WindowID = uptr;
-	using SurfaceID = uptr;
-
-	struct RenderDevice;
-	class WindowDriver;
-
 	class NOVA_API RenderDriver {
 	  public:
 		static RenderDriver* create(RenderAPI api, WindowDriver* window_driver = nullptr);

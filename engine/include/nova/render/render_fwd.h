@@ -8,4 +8,10 @@
 
 namespace Nova {
 	enum class RenderAPI { DX12, VULKAN };
+
+	class RenderDriver;
+	struct RenderDevice;
+
+	struct Surface;
+	using SurfaceID = Surface*;
 } // namespace Nova

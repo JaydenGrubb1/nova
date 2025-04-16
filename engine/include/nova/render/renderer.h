@@ -7,8 +7,7 @@
 #pragma once
 
 #include <nova/api.h>
-#include <nova/render/render_api.h>
-#include <nova/render/render_driver.h>
+#include <nova/render/render_fwd.h>
 
 namespace Nova {
 	class NOVA_API Renderer {

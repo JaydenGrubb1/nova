@@ -74,19 +74,18 @@ const RenderDevice& VulkanRenderDriver::get_device(const u32 p_index) const {
 	return m_devices[p_index];
 }
 
-bool VulkanRenderDriver::get_device_supports_surface(const u32 p_index, const SurfaceID p_surface) const {
+bool VulkanRenderDriver::get_device_supports_surface(const u32 p_index, SurfaceID p_surface) const {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(p_index < m_devices.size());
 	NOVA_ASSERT(p_surface);
 
 	// TODO: Check other queue families?
 
-	SurfaceData* data = reinterpret_cast<SurfaceData*>(p_surface);
 	VkBool32 supported = false;
 	if (vkGetPhysicalDeviceSurfaceSupportKHR(
 			static_cast<VkPhysicalDevice>(m_devices[p_index].handle),
 			0,
-			data->handle,
+			p_surface->handle,
 			&supported
 		)
 		!= VK_SUCCESS) {
@@ -95,7 +94,7 @@ bool VulkanRenderDriver::get_device_supports_surface(const u32 p_index, const Su
 	return supported;
 }
 
-void VulkanRenderDriver::select_device(u32 p_index) {
+void VulkanRenderDriver::select_device(const u32 p_index) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(!m_device);
 	NOVA_ASSERT(p_index < m_devices.size());
@@ -112,17 +111,16 @@ void VulkanRenderDriver::select_device(u32 p_index) {
 	_init_device(queues);
 }
 
-SurfaceID VulkanRenderDriver::create_surface(const WindowID p_window) {
+SurfaceID VulkanRenderDriver::create_surface(WindowID p_window) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(m_window_driver);
 	return m_window_driver->create_surface(p_window, this);
 }
 
-void VulkanRenderDriver::destroy_surface(const SurfaceID p_surface) {
+void VulkanRenderDriver::destroy_surface(SurfaceID p_surface) {
 	NOVA_AUTO_TRACE();
-	SurfaceData* data = reinterpret_cast<SurfaceData*>(p_surface);
-	vkDestroySurfaceKHR(m_instance, data->handle, get_allocator(VK_OBJECT_TYPE_SURFACE_KHR));
-	delete data;
+	vkDestroySurfaceKHR(m_instance, p_surface->handle, get_allocator(VK_OBJECT_TYPE_SURFACE_KHR));
+	delete p_surface;
 }
 
 VkInstance VulkanRenderDriver::get_instance() const {

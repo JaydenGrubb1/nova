@@ -7,17 +7,13 @@
 #pragma once
 
 #include <nova/api.h>
-#include <nova/platform/window_api.h>
+#include <nova/platform/window_fwd.h>
+#include <nova/render/render_fwd.h>
 #include <nova/types.h>
 
 #include <string_view>
 
 namespace Nova {
-	using WindowID = uptr;
-	using SurfaceID = uptr;
-
-	class RenderDriver;
-
 	class NOVA_API WindowDriver {
 	  public:
 		static WindowDriver* create();

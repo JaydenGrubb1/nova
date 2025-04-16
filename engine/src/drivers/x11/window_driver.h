@@ -13,8 +13,15 @@
 
 #include <unordered_map>
 
+namespace X11 {
+	using Window = ::Window;
+	using Display = ::Display;
+	using Atom = ::Atom;
+} // namespace X11
+
 namespace Nova {
-	struct WindowData {
+	struct Window {
+		X11::Window handle = 0;
 		int width = 0;
 		int height = 0;
 	};
@@ -42,10 +49,9 @@ namespace Nova {
 		[[nodiscard]] SurfaceID create_surface(WindowID window, RenderDriver* driver) override;
 
 	  private:
-		Display* m_display = nullptr;
-		std::unordered_map<WindowID, WindowData> m_windows;
-
-		Atom m_window_close_atom = 0;
+		X11::Display* m_display = nullptr;
+		X11::Atom m_window_close_atom = 0;
+		std::unordered_map<X11::Window, Nova::Window> m_windows;
 	};
 } // namespace Nova
 
