@@ -54,6 +54,20 @@ else ()
 	)
 endif ()
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	add_compile_definitions(
+		NOVA_COMPILER_CLANG
+	)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+	add_compile_definitions(
+		NOVA_COMPILER_GCC
+	)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	add_compile_definitions(
+		NOVA_COMPILER_MSVC
+	)
+endif ()
+
 if (NOVA_BUILD_ENGINE)
 	add_subdirectory(engine)
 endif ()
