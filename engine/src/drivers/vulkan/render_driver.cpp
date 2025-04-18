@@ -14,7 +14,9 @@
 #include <nova/version.h>
 #include <vulkan/vulkan.h>
 
+#include <algorithm>
 #include <format>
+#include <limits>
 #include <unordered_map>
 
 #define VALIDATION_LAYER "VK_LAYER_KHRONOS_validation"
@@ -119,8 +121,174 @@ SurfaceID VulkanRenderDriver::create_surface(WindowID p_window) {
 
 void VulkanRenderDriver::destroy_surface(SurfaceID p_surface) {
 	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_surface);
 	vkDestroySurfaceKHR(m_instance, p_surface->handle, get_allocator(VK_OBJECT_TYPE_SURFACE_KHR));
 	delete p_surface;
+}
+
+SwapchainID VulkanRenderDriver::create_swapchain(SurfaceID p_surface) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_surface);
+
+	Swapchain* swapchain = new Swapchain();
+	swapchain->surface = p_surface;
+
+	u32 count;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, p_surface->handle, &count, nullptr); // TODO: Check result
+	std::vector<VkSurfaceFormatKHR> formats(count);
+	vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, p_surface->handle, &count, formats.data()); // TODO: Check result
+
+	const VkFormat preferred_format = VK_FORMAT_B8G8R8A8_UNORM; // TODO: Get from config?
+	const VkFormat fallback_format = VK_FORMAT_R8G8B8A8_UNORM; // TODO: Get from config?
+
+	if (count == 1 && formats[0].format == VK_FORMAT_UNDEFINED) {
+		swapchain->format = preferred_format;
+		swapchain->color_space = formats[0].colorSpace;
+	} else {
+		for (const auto& format : formats) {
+			if (format.format == preferred_format || format.format == fallback_format) {
+				swapchain->format = format.format;
+				swapchain->color_space = format.colorSpace;
+				if (swapchain->format == preferred_format) {
+					break;
+				}
+			}
+		}
+	}
+
+	if (swapchain->format == VK_FORMAT_UNDEFINED) {
+		throw std::runtime_error("Failed to find a supported swapchain format");
+	}
+
+	// TODO: Create render pass
+
+	return swapchain;
+}
+
+void VulkanRenderDriver::resize_swapchain(SwapchainID p_swapchain) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_swapchain);
+
+	Surface* surface = p_swapchain->surface;
+
+	// TODO: Release old swapchain resources
+
+	VkSurfaceCapabilitiesKHR capabilities;
+	if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, surface->handle, &capabilities) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to get surface capabilities");
+	}
+
+	VkExtent2D extent;
+	if (capabilities.currentExtent.width == std::numeric_limits<u32>::max()) {
+		extent.width = std::clamp(surface->width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+		extent.height =
+			std::clamp(surface->height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+	} else {
+		extent = capabilities.currentExtent;
+		surface->width = extent.width;
+		surface->height = extent.height;
+	}
+
+	if (extent.width == 0 || extent.height == 0) {
+		return;
+	}
+
+	u32 image_count = capabilities.minImageCount + 1;
+	if (capabilities.maxImageCount > 0 && image_count > capabilities.maxImageCount) {
+		image_count = capabilities.maxImageCount;
+	}
+
+	u32 present_mode_count;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(
+		m_physical_device,
+		surface->handle,
+		&present_mode_count,
+		nullptr
+	); // TODO: Check result
+	std::vector<VkPresentModeKHR> present_modes(present_mode_count);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(
+		m_physical_device,
+		surface->handle,
+		&present_mode_count,
+		present_modes.data()
+	); // TODO: Check result
+
+	VkPresentModeKHR present_mode = VK_PRESENT_MODE_MAILBOX_KHR; // TODO: Get from config
+	if (std::find(present_modes.begin(), present_modes.end(), present_mode) == present_modes.end()) {
+		NOVA_WARN("Preferred present mode not supported, falling back to FIFO");
+		present_mode = VK_PRESENT_MODE_FIFO_KHR;
+		// TODO: Update config
+	}
+
+	VkSwapchainCreateInfoKHR swap_create {};
+	swap_create.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	swap_create.surface = surface->handle;
+	swap_create.minImageCount = image_count;
+	swap_create.imageFormat = p_swapchain->format;
+	swap_create.imageColorSpace = p_swapchain->color_space;
+	swap_create.imageExtent = extent;
+	swap_create.imageArrayLayers = 1; // TODO: Support VR
+	swap_create.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // TRANSFER_DST_BIT ???
+	swap_create.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	swap_create.preTransform = capabilities.currentTransform;
+	swap_create.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR; // TODO: Support transparent windows
+	swap_create.presentMode = present_mode;
+	swap_create.clipped = VK_TRUE;
+	swap_create.oldSwapchain = VK_NULL_HANDLE; // TODO: Handle old swapchain
+
+	if (vkCreateSwapchainKHR(m_device, &swap_create, get_allocator(VK_OBJECT_TYPE_SWAPCHAIN_KHR), &p_swapchain->handle)
+		!= VK_SUCCESS) {
+		throw std::runtime_error("Failed to create swapchain");
+	}
+
+	NOVA_LOG("VkSwapchainKHR created");
+
+	vkGetSwapchainImagesKHR(m_device, p_swapchain->handle, &image_count, nullptr); // TODO: Check result
+	p_swapchain->images.resize(image_count);
+	vkGetSwapchainImagesKHR(m_device, p_swapchain->handle, &image_count, p_swapchain->images.data()); // TODO: Check result
+
+	VkImageViewCreateInfo view_create {};
+	view_create.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	view_create.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	view_create.format = p_swapchain->format;
+	view_create.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_create.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_create.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_create.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+	view_create.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	view_create.subresourceRange.baseMipLevel = 0;
+	view_create.subresourceRange.levelCount = 1;
+	view_create.subresourceRange.baseArrayLayer = 0; // TODO: Support VR
+	view_create.subresourceRange.layerCount = 1; // TODO: Support VR
+
+	p_swapchain->image_views.resize(image_count);
+	for (u32 i = 0; i < image_count; i++) {
+		view_create.image = p_swapchain->images[i];
+		if (vkCreateImageView(m_device, &view_create, get_allocator(VK_OBJECT_TYPE_IMAGE_VIEW), &p_swapchain->image_views[i])
+			!= VK_SUCCESS) {
+			throw std::runtime_error("Failed to create image view");
+		}
+	}
+
+	// TODO: Create framebuffers
+}
+
+void VulkanRenderDriver::destroy_swapchain(SwapchainID p_swapchain) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_swapchain);
+
+	for (const auto& framebuffer : p_swapchain->framebuffers) {
+		vkDestroyFramebuffer(m_device, framebuffer, get_allocator(VK_OBJECT_TYPE_FRAMEBUFFER));
+	}
+	for (const auto& image_view : p_swapchain->image_views) {
+		vkDestroyImageView(m_device, image_view, get_allocator(VK_OBJECT_TYPE_IMAGE_VIEW));
+	}
+	if (p_swapchain->handle) {
+		vkDestroySwapchainKHR(m_device, p_swapchain->handle, get_allocator(VK_OBJECT_TYPE_SWAPCHAIN_KHR));
+	}
+	// TODO: Destroy render pass
+
+	delete p_swapchain;
 }
 
 VkInstance VulkanRenderDriver::get_instance() const {

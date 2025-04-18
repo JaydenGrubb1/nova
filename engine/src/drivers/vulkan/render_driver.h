@@ -16,6 +16,19 @@
 namespace Nova {
 	struct Surface {
 		VkSurfaceKHR handle = VK_NULL_HANDLE;
+		u32 width = 0;
+		u32 height = 0;
+		bool dirty = false; // TODO: Use state enum
+	};
+
+	struct Swapchain {
+		VkSwapchainKHR handle = VK_NULL_HANDLE;
+		VkFormat format = VK_FORMAT_UNDEFINED;
+		VkColorSpaceKHR color_space = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+		std::vector<VkImage> images;
+		std::vector<VkImageView> image_views;
+		std::vector<VkFramebuffer> framebuffers;
+		SurfaceID surface = nullptr;
 	};
 
 	class VulkanRenderDriver final : public RenderDriver {
@@ -35,6 +48,10 @@ namespace Nova {
 
 		[[nodiscard]] SurfaceID create_surface(WindowID window) override;
 		void destroy_surface(SurfaceID surface) override;
+
+		[[nodiscard]] SwapchainID create_swapchain(SurfaceID surface) override;
+		void resize_swapchain(SwapchainID swapchain) override;
+		void destroy_swapchain(SwapchainID swapchain) override;
 
 		[[nodiscard]] VkInstance get_instance() const;
 		[[nodiscard]] VkAllocationCallbacks* get_allocator(VkObjectType type) const;

@@ -37,5 +37,9 @@ namespace Nova {
 		// TODO: set_surface_size
 		// TODO: set_surface_mode
 		// TODO: set_surface_state
+
+		[[nodiscard]] virtual SwapchainID create_swapchain(SurfaceID surface) = 0;
+		virtual void resize_swapchain(SwapchainID swapchain) = 0;
+		virtual void destroy_swapchain(SwapchainID swapchain) = 0;
 	};
 } // namespace Nova

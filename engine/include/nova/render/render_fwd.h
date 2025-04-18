@@ -13,5 +13,8 @@ namespace Nova {
 	struct RenderDevice;
 
 	struct Surface;
+	struct Swapchain;
+
 	using SurfaceID = Surface*;
+	using SwapchainID = Swapchain*;
 } // namespace Nova
