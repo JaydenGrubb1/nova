@@ -291,6 +291,35 @@ void VulkanRenderDriver::destroy_swapchain(SwapchainID p_swapchain) {
 	delete p_swapchain;
 }
 
+ShaderID VulkanRenderDriver::create_shader(const std::span<u8> p_bytes) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(!p_bytes.empty());
+
+	Shader* shader = new Shader();
+
+	VkShaderModuleCreateInfo create {};
+	create.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	create.codeSize = p_bytes.size();
+	create.pCode = reinterpret_cast<const u32*>(p_bytes.data());
+
+	if (vkCreateShaderModule(m_device, &create, get_allocator(VK_OBJECT_TYPE_SHADER_MODULE), &shader->handle)
+		!= VK_SUCCESS) {
+		throw std::runtime_error("Failed to create shader module");
+	}
+
+	NOVA_LOG("VkShaderModule created");
+	return shader;
+}
+
+void VulkanRenderDriver::destroy_shader(ShaderID p_shader) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_shader);
+	if (p_shader->handle) {
+		vkDestroyShaderModule(m_device, p_shader->handle, get_allocator(VK_OBJECT_TYPE_SHADER_MODULE));
+	}
+	delete p_shader;
+}
+
 VkInstance VulkanRenderDriver::get_instance() const {
 	return m_instance;
 }

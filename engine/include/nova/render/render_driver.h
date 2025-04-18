@@ -11,6 +11,7 @@
 #include <nova/render/render_fwd.h>
 #include <nova/types.h>
 
+#include <span>
 #include <string>
 
 namespace Nova {
@@ -41,5 +42,8 @@ namespace Nova {
 		[[nodiscard]] virtual SwapchainID create_swapchain(SurfaceID surface) = 0;
 		virtual void resize_swapchain(SwapchainID swapchain) = 0;
 		virtual void destroy_swapchain(SwapchainID swapchain) = 0;
+
+		[[nodiscard]] virtual ShaderID create_shader(const std::span<u8> bytes) = 0;
+		virtual void destroy_shader(ShaderID shader) = 0;
 	};
 } // namespace Nova

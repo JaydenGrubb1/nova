@@ -14,6 +14,10 @@
 #include <vector>
 
 namespace Nova {
+	struct Shader {
+		VkShaderModule handle = VK_NULL_HANDLE;
+	};
+
 	struct Surface {
 		VkSurfaceKHR handle = VK_NULL_HANDLE;
 		u32 width = 0;
@@ -52,6 +56,9 @@ namespace Nova {
 		[[nodiscard]] SwapchainID create_swapchain(SurfaceID surface) override;
 		void resize_swapchain(SwapchainID swapchain) override;
 		void destroy_swapchain(SwapchainID swapchain) override;
+
+		[[nodiscard]] ShaderID create_shader(const std::span<u8> bytes) override;
+		void destroy_shader(ShaderID shader) override;
 
 		[[nodiscard]] VkInstance get_instance() const;
 		[[nodiscard]] VkAllocationCallbacks* get_allocator(VkObjectType type) const;

@@ -12,9 +12,11 @@ namespace Nova {
 	class RenderDriver;
 	struct RenderDevice;
 
+	struct Shader;
 	struct Surface;
 	struct Swapchain;
 
+	using ShaderID = Shader*;
 	using SurfaceID = Surface*;
 	using SwapchainID = Swapchain*;
 } // namespace Nova
