@@ -500,6 +500,19 @@ void VulkanRenderDriver::destroy_pipeline(PipelineID p_pipeline) {
 	delete p_pipeline;
 }
 
+RenderPassID VulkanRenderDriver::create_render_pass() {
+	NOVA_AUTO_TRACE();
+	NOVA_WARN("{}() not implemented", NOVA_FUNC_NAME);
+	RenderPass* render_pass = new RenderPass();
+	return render_pass;
+}
+
+void VulkanRenderDriver::destroy_render_pass(RenderPassID p_render_pass) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_render_pass);
+	delete p_render_pass;
+}
+
 VkInstance VulkanRenderDriver::get_instance() const {
 	return m_instance;
 }

@@ -74,6 +74,9 @@ namespace Nova {
 		[[nodiscard]] PipelineID create_pipeline(ComputePipelineParams& params) override;
 		void destroy_pipeline(PipelineID pipeline) override;
 
+		[[nodiscard]] RenderPassID create_render_pass() override;
+		void destroy_render_pass(RenderPassID render_pass) override;
+
 		[[nodiscard]] VkInstance get_instance() const;
 		[[nodiscard]] VkAllocationCallbacks* get_allocator(VkObjectType type) const;
 

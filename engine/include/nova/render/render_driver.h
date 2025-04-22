@@ -44,5 +44,8 @@ namespace Nova {
 		[[nodiscard]] virtual PipelineID create_pipeline(GraphicsPipelineParams& params) = 0;
 		[[nodiscard]] virtual PipelineID create_pipeline(ComputePipelineParams& params) = 0;
 		virtual void destroy_pipeline(PipelineID pipeline) = 0;
+
+		[[nodiscard]] virtual RenderPassID create_render_pass() = 0;
+		virtual void destroy_render_pass(RenderPassID render_pass) = 0;
 	};
 } // namespace Nova
