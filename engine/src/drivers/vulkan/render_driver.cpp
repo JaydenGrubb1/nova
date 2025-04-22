@@ -11,6 +11,7 @@
 #include <nova/core/debug.h>
 #include <nova/platform/window_driver.h>
 #include <nova/render/render_device.h>
+#include <nova/render/render_params.h>
 #include <nova/version.h>
 #include <vulkan/vulkan.h>
 
@@ -22,6 +23,40 @@
 #define VALIDATION_LAYER "VK_LAYER_KHRONOS_validation"
 
 using namespace Nova;
+
+// clang-format off
+
+static constexpr VkShaderStageFlagBits VK_SHADER_STAGE_MAP[] = {
+	VK_SHADER_STAGE_VERTEX_BIT,
+	VK_SHADER_STAGE_FRAGMENT_BIT,
+	VK_SHADER_STAGE_GEOMETRY_BIT,
+	VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+	VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+	VK_SHADER_STAGE_COMPUTE_BIT,
+	VK_SHADER_STAGE_MESH_BIT_EXT,
+	VK_SHADER_STAGE_TASK_BIT_EXT
+};
+
+static constexpr VkPrimitiveTopology VK_PRIMITIVE_TOPOLOGY_MAP[] = {
+	VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
+	VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+	VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
+	VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+	VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP
+};
+
+static constexpr VkCullModeFlags VK_CULL_MODE_MAP[] = {
+	VK_CULL_MODE_NONE,
+	VK_CULL_MODE_FRONT_BIT,
+	VK_CULL_MODE_BACK_BIT
+};
+
+static constexpr VkFrontFace VK_FRONT_FACE_MAP[] = {
+	VK_FRONT_FACE_COUNTER_CLOCKWISE,
+	VK_FRONT_FACE_CLOCKWISE
+};
+
+// clang-format on
 
 VulkanRenderDriver::VulkanRenderDriver(WindowDriver* p_driver) : m_window_driver(p_driver) {
 	NOVA_AUTO_TRACE();
@@ -318,6 +353,151 @@ void VulkanRenderDriver::destroy_shader(ShaderID p_shader) {
 		vkDestroyShaderModule(m_device, p_shader->handle, get_allocator(VK_OBJECT_TYPE_SHADER_MODULE));
 	}
 	delete p_shader;
+}
+
+PipelineID VulkanRenderDriver::create_pipeline(GraphicsPipelineParams& p_params) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_params.render_pass);
+
+	std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
+	for (const auto& [stage, shader] : p_params.shaders) {
+		VkPipelineShaderStageCreateInfo stage_create {};
+		stage_create.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		stage_create.stage = VK_SHADER_STAGE_MAP[static_cast<int>(stage)];
+		stage_create.module = shader->handle;
+		stage_create.pName = "main"; // TODO: Get from shader
+		// TODO: Get specialization info from shader
+		shader_stages.push_back(stage_create);
+	}
+
+	// TODO: Properly set up vertex input state
+	VkPipelineVertexInputStateCreateInfo vertex_input {};
+	vertex_input.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertex_input.vertexBindingDescriptionCount = 0;
+	vertex_input.vertexAttributeDescriptionCount = 0;
+
+	VkPipelineInputAssemblyStateCreateInfo input_assembly {};
+	input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_MAP[static_cast<int>(p_params.topology)];
+	input_assembly.primitiveRestartEnable = VK_FALSE;
+
+	// TODO: Tessellation state
+
+	VkPipelineViewportStateCreateInfo viewport {};
+	viewport.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewport.viewportCount = 1; // TODO: Support VR
+	viewport.scissorCount = 1;
+
+	VkPipelineRasterizationStateCreateInfo rasterization {};
+	rasterization.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterization.depthClampEnable = p_params.enable_depth_clamp;
+	rasterization.rasterizerDiscardEnable = p_params.discard_primitives;
+	rasterization.polygonMode = p_params.wireframe ? VK_POLYGON_MODE_LINE : VK_POLYGON_MODE_FILL;
+	rasterization.cullMode = VK_CULL_MODE_MAP[static_cast<int>(p_params.cull_mode)];
+	rasterization.frontFace = VK_FRONT_FACE_MAP[static_cast<int>(p_params.front_face)];
+	rasterization.depthBiasEnable = p_params.enable_depth_bias;
+	rasterization.depthBiasConstantFactor = p_params.depth_bias_constant;
+	rasterization.depthBiasClamp = p_params.depth_bias_clamp;
+	rasterization.depthBiasSlopeFactor = p_params.depth_bias_slope;
+	rasterization.lineWidth = p_params.line_width;
+
+	VkPipelineMultisampleStateCreateInfo multisample {};
+	multisample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisample.sampleShadingEnable = VK_FALSE; // TODO: Support MSAA
+	multisample.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT; // TODO: Support MSAA
+
+	// TODO: Depth stencil state
+
+	// TODO: Properly set up color blend state
+	std::vector<VkPipelineColorBlendAttachmentState> attachments;
+	VkPipelineColorBlendStateCreateInfo color_blend {};
+	color_blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	color_blend.logicOpEnable = VK_FALSE;
+	color_blend.logicOp = VK_LOGIC_OP_COPY;
+	color_blend.attachmentCount = static_cast<u32>(attachments.size());
+	color_blend.pAttachments = attachments.data();
+	color_blend.blendConstants[0] = 0.0f;
+	color_blend.blendConstants[1] = 0.0f;
+	color_blend.blendConstants[2] = 0.0f;
+	color_blend.blendConstants[3] = 0.0f;
+
+	std::vector<VkDynamicState> dynamic_states;
+	dynamic_states.push_back(VK_DYNAMIC_STATE_VIEWPORT);
+	dynamic_states.push_back(VK_DYNAMIC_STATE_SCISSOR);
+	// TODO: Add more dynamic states
+	VkPipelineDynamicStateCreateInfo dynamic_state {};
+	dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamic_state.dynamicStateCount = static_cast<u32>(dynamic_states.size());
+	dynamic_state.pDynamicStates = dynamic_states.data();
+
+	Pipeline* pipeline = new Pipeline();
+
+	// TODO: Move this to the shader
+	VkPipelineLayoutCreateInfo layout_create {};
+	layout_create.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	layout_create.setLayoutCount = 0; // TODO: Add descriptor sets
+	layout_create.pushConstantRangeCount = 0; // TODO: Add push constants
+	if (vkCreatePipelineLayout(m_device, &layout_create, get_allocator(VK_OBJECT_TYPE_PIPELINE_LAYOUT), &pipeline->layout)
+		!= VK_SUCCESS) {
+		throw std::runtime_error("Failed to create pipeline layout");
+	}
+
+	VkGraphicsPipelineCreateInfo pipeline_create {};
+	pipeline_create.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipeline_create.stageCount = static_cast<u32>(shader_stages.size());
+	pipeline_create.pStages = shader_stages.data();
+	pipeline_create.pVertexInputState = &vertex_input;
+	pipeline_create.pInputAssemblyState = &input_assembly;
+	pipeline_create.pTessellationState = nullptr; // TODO: Add tessellation state
+	pipeline_create.pViewportState = &viewport;
+	pipeline_create.pRasterizationState = &rasterization;
+	pipeline_create.pMultisampleState = &multisample;
+	pipeline_create.pDepthStencilState = nullptr; // TODO: Add depth stencil state
+	pipeline_create.pColorBlendState = &color_blend;
+	pipeline_create.pDynamicState = &dynamic_state;
+	pipeline_create.layout = pipeline->layout;
+	pipeline_create.renderPass = p_params.render_pass->handle;
+	pipeline_create.subpass = p_params.subpass;
+
+	if (vkCreateGraphicsPipelines(
+			m_device,
+			VK_NULL_HANDLE,
+			1,
+			&pipeline_create,
+			get_allocator(VK_OBJECT_TYPE_PIPELINE),
+			&pipeline->handle
+		)
+		!= VK_SUCCESS) {
+		throw std::runtime_error("Failed to create graphics pipeline");
+	}
+	return pipeline;
+}
+
+PipelineID VulkanRenderDriver::create_pipeline(ComputePipelineParams& p_params) {
+	NOVA_AUTO_TRACE();
+	Pipeline* pipeline = new Pipeline();
+	(void)p_params;
+
+	VkComputePipelineCreateInfo create {};
+	create.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+
+	if (vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &create, get_allocator(VK_OBJECT_TYPE_PIPELINE), &pipeline->handle)
+		!= VK_SUCCESS) {
+		throw std::runtime_error("Failed to create compute pipeline");
+	}
+	return pipeline;
+}
+
+void VulkanRenderDriver::destroy_pipeline(PipelineID p_pipeline) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_pipeline);
+	if (p_pipeline->layout) {
+		vkDestroyPipelineLayout(m_device, p_pipeline->layout, get_allocator(VK_OBJECT_TYPE_PIPELINE_LAYOUT));
+	}
+	if (p_pipeline->handle) {
+		vkDestroyPipeline(m_device, p_pipeline->handle, get_allocator(VK_OBJECT_TYPE_PIPELINE));
+	}
+	delete p_pipeline;
 }
 
 VkInstance VulkanRenderDriver::get_instance() const {

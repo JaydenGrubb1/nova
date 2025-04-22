@@ -15,6 +15,7 @@
 #include <string>
 
 namespace Nova {
+
 	class NOVA_API RenderDriver {
 	  public:
 		static RenderDriver* create(RenderAPI api, WindowDriver* window_driver = nullptr);
@@ -32,12 +33,6 @@ namespace Nova {
 
 		[[nodiscard]] virtual SurfaceID create_surface(WindowID window) = 0;
 		virtual void destroy_surface(SurfaceID surface) = 0;
-		// TODO: get_surface_size
-		// TODO: get_surface_mode
-		// TODO: get_surface_state
-		// TODO: set_surface_size
-		// TODO: set_surface_mode
-		// TODO: set_surface_state
 
 		[[nodiscard]] virtual SwapchainID create_swapchain(SurfaceID surface) = 0;
 		virtual void resize_swapchain(SwapchainID swapchain) = 0;
@@ -45,5 +40,9 @@ namespace Nova {
 
 		[[nodiscard]] virtual ShaderID create_shader(const std::span<u8> bytes) = 0;
 		virtual void destroy_shader(ShaderID shader) = 0;
+
+		[[nodiscard]] virtual PipelineID create_pipeline(GraphicsPipelineParams& params) = 0;
+		[[nodiscard]] virtual PipelineID create_pipeline(ComputePipelineParams& params) = 0;
+		virtual void destroy_pipeline(PipelineID pipeline) = 0;
 	};
 } // namespace Nova

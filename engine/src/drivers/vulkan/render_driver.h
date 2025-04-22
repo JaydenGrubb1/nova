@@ -14,6 +14,16 @@
 #include <vector>
 
 namespace Nova {
+	struct Pipeline {
+		PipelineType type;
+		VkPipeline handle = VK_NULL_HANDLE;
+		VkPipelineLayout layout = VK_NULL_HANDLE;
+	};
+
+	struct RenderPass {
+		VkRenderPass handle = VK_NULL_HANDLE;
+	};
+
 	struct Shader {
 		VkShaderModule handle = VK_NULL_HANDLE;
 	};
@@ -59,6 +69,10 @@ namespace Nova {
 
 		[[nodiscard]] ShaderID create_shader(const std::span<u8> bytes) override;
 		void destroy_shader(ShaderID shader) override;
+
+		[[nodiscard]] PipelineID create_pipeline(GraphicsPipelineParams& params) override;
+		[[nodiscard]] PipelineID create_pipeline(ComputePipelineParams& params) override;
+		void destroy_pipeline(PipelineID pipeline) override;
 
 		[[nodiscard]] VkInstance get_instance() const;
 		[[nodiscard]] VkAllocationCallbacks* get_allocator(VkObjectType type) const;
