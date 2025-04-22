@@ -8,6 +8,7 @@
 #include <nova/platform/window_driver.h>
 #include <nova/render/render_device.h>
 #include <nova/render/render_driver.h>
+#include <nova/render/render_params.h>
 #include <nova/types.h>
 
 #include <cstdlib>
@@ -136,25 +137,37 @@ int main() {
 	Debug::get_logger()->set_level(spdlog::level::trace);
 
 	try {
-		auto wd = WindowDriver::create();
-		auto rd = RenderDriver::create(RenderAPI::VULKAN, wd);
+		WindowDriver* wd = WindowDriver::create();
+		RenderDriver* rd = RenderDriver::create(RenderAPI::VULKAN, wd);
 
-		auto window = wd->create_window("Nova", 1280, 720);
-		auto surface = rd->create_surface(window);
+		WindowID window = wd->create_window("Nova", 1280, 720);
+		SurfaceID surface = rd->create_surface(window);
 
-		auto device = RenderDevice::choose_device(rd, surface);
+		u32 device = RenderDevice::choose_device(rd, surface);
 		rd->select_device(device);
 
-		auto swapchain = rd->create_swapchain(surface);
-		rd->resize_swapchain(swapchain); // TODO: Trigger on window resize
+		SwapchainID swapchain = rd->create_swapchain(surface);
+		rd->resize_swapchain(swapchain);
 
-		auto frag = rd->create_shader(frag_bytes);
-		auto vert = rd->create_shader(vert_bytes);
+		ShaderID frag = rd->create_shader(frag_bytes, ShaderStage::FRAGMENT);
+		ShaderID vert = rd->create_shader(vert_bytes, ShaderStage::VERTEX);
+
+		RenderPassID render_pass = rd->create_render_pass();
+
+		GraphicsPipelineParams params;
+		params.shaders = {vert, frag};
+		params.topology = PrimitiveTopology::TRIANGLE_LIST;
+		params.render_pass = render_pass;
+		params.subpass = 0;
+
+		PipelineID gfx = rd->create_pipeline(params);
 
 		while (wd->get_window_count() > 0) {
 			wd->poll_events();
 		}
 
+		rd->destroy_render_pass(render_pass);
+		rd->destroy_pipeline(gfx);
 		rd->destroy_shader(vert);
 		rd->destroy_shader(frag);
 		rd->destroy_swapchain(swapchain);
