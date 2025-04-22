@@ -10,13 +10,26 @@
 #include <nova/types.h>
 
 #include <unordered_map>
+#include <vector>
 
 namespace Nova {
+	struct VertexAttribute {
+		u32 binding = 0;
+		u32 location = 0;
+		u32 offset = 0;
+		DataFormat format = DataFormat::R32G32B32_SFLOAT;
+	};
+
+	struct VertexBinding {
+		u32 binding = 0;
+		u32 stride = 0;
+		InputRate rate = InputRate::VERTEX;
+	};
+
 	struct GraphicsPipelineParams {
 		std::unordered_map<ShaderStage, ShaderID> shaders;
-
-		// TODO: Vertex input state
-
+		std::vector<VertexBinding> bindings;
+		std::vector<VertexAttribute> attributes;
 		PrimitiveTopology topology = PrimitiveTopology::TRIANGLE_LIST;
 
 		// TODO: Tessellation state
