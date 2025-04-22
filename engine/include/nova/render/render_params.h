@@ -9,7 +9,6 @@
 #include <nova/render/render_fwd.h>
 #include <nova/types.h>
 
-#include <unordered_map>
 #include <vector>
 
 namespace Nova {
@@ -27,7 +26,7 @@ namespace Nova {
 	};
 
 	struct GraphicsPipelineParams {
-		std::unordered_map<ShaderStage, ShaderID> shaders;
+		std::vector<ShaderID> shaders;
 		std::vector<VertexBinding> bindings;
 		std::vector<VertexAttribute> attributes;
 		PrimitiveTopology topology = PrimitiveTopology::TRIANGLE_LIST;

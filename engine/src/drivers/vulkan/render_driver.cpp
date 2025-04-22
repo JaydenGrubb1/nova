@@ -553,11 +553,13 @@ void VulkanRenderDriver::destroy_swapchain(SwapchainID p_swapchain) {
 	delete p_swapchain;
 }
 
-ShaderID VulkanRenderDriver::create_shader(const std::span<u8> p_bytes) {
+ShaderID VulkanRenderDriver::create_shader(const std::span<u8> p_bytes, ShaderStage p_stage) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(!p_bytes.empty());
 
 	Shader* shader = new Shader();
+	shader->stage = p_stage; // TODO: Get from shader code
+	shader->name = "main"; // TODO: Get from shader code
 
 	VkShaderModuleCreateInfo create {};
 	create.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -587,12 +589,12 @@ PipelineID VulkanRenderDriver::create_pipeline(GraphicsPipelineParams& p_params)
 	NOVA_ASSERT(p_params.render_pass);
 
 	std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
-	for (const auto& [stage, shader] : p_params.shaders) {
+	for (const auto& shader : p_params.shaders) {
 		VkPipelineShaderStageCreateInfo stage_create {};
 		stage_create.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		stage_create.stage = VK_SHADER_STAGE_MAP[static_cast<int>(stage)];
+		stage_create.stage = VK_SHADER_STAGE_MAP[static_cast<int>(shader->stage)];
 		stage_create.module = shader->handle;
-		stage_create.pName = "main"; // TODO: Get from shader
+		stage_create.pName = shader->name.c_str();
 		// TODO: Get specialization info from shader
 		shader_stages.push_back(stage_create);
 	}

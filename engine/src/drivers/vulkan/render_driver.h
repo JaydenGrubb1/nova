@@ -26,6 +26,8 @@ namespace Nova {
 
 	struct Shader {
 		VkShaderModule handle = VK_NULL_HANDLE;
+		ShaderStage stage = ShaderStage::VERTEX;
+		std::string name;
 	};
 
 	struct Surface {
@@ -67,7 +69,7 @@ namespace Nova {
 		void resize_swapchain(SwapchainID swapchain) override;
 		void destroy_swapchain(SwapchainID swapchain) override;
 
-		[[nodiscard]] ShaderID create_shader(const std::span<u8> bytes) override;
+		[[nodiscard]] ShaderID create_shader(const std::span<u8> bytes, ShaderStage stage) override;
 		void destroy_shader(ShaderID shader) override;
 
 		[[nodiscard]] PipelineID create_pipeline(GraphicsPipelineParams& params) override;

@@ -38,7 +38,7 @@ namespace Nova {
 		virtual void resize_swapchain(SwapchainID swapchain) = 0;
 		virtual void destroy_swapchain(SwapchainID swapchain) = 0;
 
-		[[nodiscard]] virtual ShaderID create_shader(const std::span<u8> bytes) = 0;
+		[[nodiscard]] virtual ShaderID create_shader(const std::span<u8> bytes, ShaderStage stage) = 0;
 		virtual void destroy_shader(ShaderID shader) = 0;
 
 		[[nodiscard]] virtual PipelineID create_pipeline(GraphicsPipelineParams& params) = 0;
