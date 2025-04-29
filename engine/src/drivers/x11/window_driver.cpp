@@ -59,15 +59,19 @@ void X11WindowDriver::poll_events() {
 		XEvent event;
 		XNextEvent(m_display, &event);
 
-		X11::Window handle = event.xany.window;
-		Nova::Window& window = m_windows[handle];
+		auto iter = m_windows.find(event.xany.window);
+		if (iter == m_windows.end()) {
+			continue;
+		}
+
+		WindowID window = iter->second;
 
 		switch (event.type) {
 			case ConfigureNotify: {
 				XConfigureEvent xce = event.xconfigure;
-				if (xce.width != window.width || xce.height != window.height) {
-					window.width = xce.width;
-					window.height = xce.height;
+				if (xce.width != window->width || xce.height != window->height) {
+					window->width = xce.width;
+					window->height = xce.height;
 					NOVA_DEBUG("Window event: RESIZED ({}x{})", xce.width, xce.height);
 				}
 				break;
@@ -75,7 +79,7 @@ void X11WindowDriver::poll_events() {
 			case ClientMessage: {
 				if (event.xclient.data.l[0] == static_cast<long>(m_window_close_atom)) {
 					NOVA_DEBUG("Window event: CLOSED");
-					destroy_window(&window);
+					destroy_window(window);
 				}
 				break;
 			}
@@ -105,10 +109,10 @@ WindowID X11WindowDriver::create_window(const std::string_view p_title, const u3
 
 	X11::Window handle = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, p_width, p_height, 0, 0, 0);
 
-	Nova::Window& window = m_windows[handle];
-	window.width = p_width;
-	window.height = p_height;
-	window.handle = handle;
+	Window* window = new Window();
+	window->width = p_width;
+	window->height = p_height;
+	window->handle = handle;
 
 	XSetWMProtocols(m_display, handle, &m_window_close_atom, 1);
 	XSelectInput(m_display, handle, StructureNotifyMask);
@@ -116,7 +120,8 @@ WindowID X11WindowDriver::create_window(const std::string_view p_title, const u3
 	XMapWindow(m_display, handle);
 	XFlush(m_display);
 
-	return &window;
+	m_windows[handle] = window;
+	return window;
 }
 
 void X11WindowDriver::destroy_window(WindowID p_window) {

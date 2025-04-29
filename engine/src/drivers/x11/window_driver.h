@@ -51,7 +51,7 @@ namespace Nova {
 	  private:
 		X11::Display* m_display = nullptr;
 		X11::Atom m_window_close_atom = 0;
-		std::unordered_map<X11::Window, Nova::Window> m_windows;
+		std::unordered_map<X11::Window, WindowID> m_windows;
 	};
 } // namespace Nova
 
