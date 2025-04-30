@@ -143,8 +143,7 @@ int main() {
 		WindowID window = wd->create_window("Nova", 1280, 720);
 		SurfaceID surface = rd->create_surface(window);
 
-		u32 device = RenderDevice::choose_device(rd, surface);
-		rd->select_device(device);
+		rd->select_device(RenderDevice::choose_device(rd, surface));
 
 		SwapchainID swapchain = rd->create_swapchain(surface);
 		rd->resize_swapchain(swapchain);
@@ -152,22 +151,18 @@ int main() {
 		ShaderID frag = rd->create_shader(frag_bytes, ShaderStage::FRAGMENT);
 		ShaderID vert = rd->create_shader(vert_bytes, ShaderStage::VERTEX);
 
-		RenderPassID render_pass = rd->create_render_pass();
-
 		GraphicsPipelineParams params;
 		params.shaders = {vert, frag};
 		params.topology = PrimitiveTopology::TRIANGLE_LIST;
-		params.render_pass = render_pass;
-		params.subpass = 0;
+		params.render_pass = rd->get_swapchain_render_pass(swapchain);
 
-		PipelineID gfx = rd->create_pipeline(params);
+		PipelineID pipeline = rd->create_pipeline(params);
 
 		while (wd->get_window_count() > 0) {
 			wd->poll_events();
 		}
 
-		rd->destroy_render_pass(render_pass);
-		rd->destroy_pipeline(gfx);
+		rd->destroy_pipeline(pipeline);
 		rd->destroy_shader(vert);
 		rd->destroy_shader(frag);
 		rd->destroy_swapchain(swapchain);
