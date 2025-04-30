@@ -564,7 +564,27 @@ void VulkanRenderDriver::resize_swapchain(SwapchainID p_swapchain) {
 		}
 	}
 
-	// TODO: Create framebuffers
+	VkFramebufferCreateInfo fb_create {};
+	fb_create.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	fb_create.renderPass = p_swapchain->render_pass->handle;
+	fb_create.attachmentCount = 1;
+	fb_create.width = extent.width;
+	fb_create.height = extent.height;
+	fb_create.layers = 1; // TODO: Support VR
+
+	p_swapchain->framebuffers.resize(image_count);
+	for (u32 i = 0; i < image_count; i++) {
+		fb_create.pAttachments = &p_swapchain->image_views[i];
+		if (vkCreateFramebuffer(
+				m_device,
+				&fb_create,
+				get_allocator(VK_OBJECT_TYPE_FRAMEBUFFER),
+				&p_swapchain->framebuffers[i]
+			)
+			!= VK_SUCCESS) {
+			throw std::runtime_error("Failed to create framebuffer");
+		}
+	}
 }
 
 RenderPassID VulkanRenderDriver::get_swapchain_render_pass(SwapchainID p_swapchain) const {
