@@ -25,6 +25,8 @@ namespace Nova {
 		InputRate rate = InputRate::VERTEX;
 	};
 
+	struct RenderPassParams {};
+
 	struct GraphicsPipelineParams {
 		std::vector<ShaderID> shaders;
 		std::vector<VertexBinding> bindings;
@@ -52,5 +54,6 @@ namespace Nova {
 		RenderPassID render_pass = nullptr;
 		u32 subpass = 0;
 	};
+
 	struct ComputePipelineParams {};
 } // namespace Nova

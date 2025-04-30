@@ -422,7 +422,39 @@ SwapchainID VulkanRenderDriver::create_swapchain(SurfaceID p_surface) {
 		throw std::runtime_error("Failed to find a supported swapchain format");
 	}
 
-	// TODO: Create render pass
+	VkAttachmentDescription attachment {};
+	attachment.format = swapchain->format;
+	attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	VkAttachmentReference color_ref {};
+	color_ref.attachment = 0;
+	color_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass {};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &color_ref;
+
+	VkRenderPassCreateInfo pass_create {};
+	pass_create.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	pass_create.attachmentCount = 1;
+	pass_create.pAttachments = &attachment;
+	pass_create.subpassCount = 1;
+	pass_create.pSubpasses = &subpass;
+
+	swapchain->render_pass = new RenderPass();
+	if (vkCreateRenderPass(m_device, &pass_create, get_allocator(VK_OBJECT_TYPE_RENDER_PASS), &swapchain->render_pass->handle)
+		!= VK_SUCCESS) {
+		throw std::runtime_error("Failed to create render pass");
+	}
+
+	// TODO: Change VkRenderPass to VkRenderPass2KHR (Vulkan 1.2+)
 
 	return swapchain;
 }
@@ -535,6 +567,11 @@ void VulkanRenderDriver::resize_swapchain(SwapchainID p_swapchain) {
 	// TODO: Create framebuffers
 }
 
+RenderPassID VulkanRenderDriver::get_swapchain_render_pass(SwapchainID p_swapchain) const {
+	NOVA_ASSERT(p_swapchain);
+	return p_swapchain->render_pass;
+}
+
 void VulkanRenderDriver::destroy_swapchain(SwapchainID p_swapchain) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(p_swapchain);
@@ -548,7 +585,10 @@ void VulkanRenderDriver::destroy_swapchain(SwapchainID p_swapchain) {
 	if (p_swapchain->handle) {
 		vkDestroySwapchainKHR(m_device, p_swapchain->handle, get_allocator(VK_OBJECT_TYPE_SWAPCHAIN_KHR));
 	}
-	// TODO: Destroy render pass
+	if (p_swapchain->render_pass) {
+		destroy_render_pass(p_swapchain->render_pass);
+		p_swapchain->render_pass = nullptr;
+	}
 
 	delete p_swapchain;
 }
@@ -582,6 +622,23 @@ void VulkanRenderDriver::destroy_shader(ShaderID p_shader) {
 		vkDestroyShaderModule(m_device, p_shader->handle, get_allocator(VK_OBJECT_TYPE_SHADER_MODULE));
 	}
 	delete p_shader;
+}
+
+RenderPassID VulkanRenderDriver::create_render_pass(RenderPassParams& p_params) {
+	NOVA_AUTO_TRACE();
+	NOVA_WARN("{}() not implemented", NOVA_FUNC_NAME);
+	RenderPass* render_pass = new RenderPass();
+	(void)p_params;
+	return render_pass;
+}
+
+void VulkanRenderDriver::destroy_render_pass(RenderPassID p_render_pass) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_render_pass);
+	if (p_render_pass->handle) {
+		vkDestroyRenderPass(m_device, p_render_pass->handle, get_allocator(VK_OBJECT_TYPE_RENDER_PASS));
+	}
+	delete p_render_pass;
 }
 
 PipelineID VulkanRenderDriver::create_pipeline(GraphicsPipelineParams& p_params) {
@@ -745,19 +802,6 @@ void VulkanRenderDriver::destroy_pipeline(PipelineID p_pipeline) {
 		vkDestroyPipeline(m_device, p_pipeline->handle, get_allocator(VK_OBJECT_TYPE_PIPELINE));
 	}
 	delete p_pipeline;
-}
-
-RenderPassID VulkanRenderDriver::create_render_pass() {
-	NOVA_AUTO_TRACE();
-	NOVA_WARN("{}() not implemented", NOVA_FUNC_NAME);
-	RenderPass* render_pass = new RenderPass();
-	return render_pass;
-}
-
-void VulkanRenderDriver::destroy_render_pass(RenderPassID p_render_pass) {
-	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(p_render_pass);
-	delete p_render_pass;
 }
 
 VkInstance VulkanRenderDriver::get_instance() const {

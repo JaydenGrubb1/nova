@@ -242,6 +242,7 @@ namespace Nova {
 
 	struct VertexAttribute;
 	struct VertexBinding;
+	struct RenderPassParams;
 	struct GraphicsPipelineParams;
 	struct ComputePipelineParams;
 

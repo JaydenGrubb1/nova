@@ -36,16 +36,17 @@ namespace Nova {
 
 		[[nodiscard]] virtual SwapchainID create_swapchain(SurfaceID surface) = 0;
 		virtual void resize_swapchain(SwapchainID swapchain) = 0;
+		[[nodiscard]] virtual RenderPassID get_swapchain_render_pass(SwapchainID swapchain) const = 0;
 		virtual void destroy_swapchain(SwapchainID swapchain) = 0;
 
 		[[nodiscard]] virtual ShaderID create_shader(const std::span<u8> bytes, ShaderStage stage) = 0;
 		virtual void destroy_shader(ShaderID shader) = 0;
 
+		[[nodiscard]] virtual RenderPassID create_render_pass(RenderPassParams& params) = 0;
+		virtual void destroy_render_pass(RenderPassID render_pass) = 0;
+
 		[[nodiscard]] virtual PipelineID create_pipeline(GraphicsPipelineParams& params) = 0;
 		[[nodiscard]] virtual PipelineID create_pipeline(ComputePipelineParams& params) = 0;
 		virtual void destroy_pipeline(PipelineID pipeline) = 0;
-
-		[[nodiscard]] virtual RenderPassID create_render_pass() = 0;
-		virtual void destroy_render_pass(RenderPassID render_pass) = 0;
 	};
 } // namespace Nova
