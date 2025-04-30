@@ -714,6 +714,10 @@ PipelineID VulkanRenderDriver::create_pipeline(GraphicsPipelineParams& p_params)
 
 	// TODO: Properly set up color blend state
 	std::vector<VkPipelineColorBlendAttachmentState> attachments;
+	attachments.emplace_back();
+	attachments.back().colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT
+		| VK_COLOR_COMPONENT_A_BIT;
+	attachments.back().blendEnable = VK_FALSE;
 	VkPipelineColorBlendStateCreateInfo color_blend {};
 	color_blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 	color_blend.logicOpEnable = VK_FALSE;
@@ -774,6 +778,8 @@ PipelineID VulkanRenderDriver::create_pipeline(GraphicsPipelineParams& p_params)
 		!= VK_SUCCESS) {
 		throw std::runtime_error("Failed to create graphics pipeline");
 	}
+
+	NOVA_LOG("VkPipeline created");
 	return pipeline;
 }
 
