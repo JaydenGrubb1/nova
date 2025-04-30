@@ -14,10 +14,23 @@
 #include <vector>
 
 namespace Nova {
+	struct CommandBuffer {
+		VkCommandBuffer handle = VK_NULL_HANDLE;
+	};
+
+	struct CommandPool {
+		VkCommandPool handle = VK_NULL_HANDLE;
+		std::vector<CommandBufferID> allocated_buffers;
+	};
+
 	struct Pipeline {
 		PipelineType type;
 		VkPipeline handle = VK_NULL_HANDLE;
 		VkPipelineLayout layout = VK_NULL_HANDLE;
+	};
+
+	struct Queue {
+		u32 family_index;
 	};
 
 	struct RenderPass {
@@ -80,6 +93,16 @@ namespace Nova {
 		[[nodiscard]] PipelineID create_pipeline(GraphicsPipelineParams& params) override;
 		[[nodiscard]] PipelineID create_pipeline(ComputePipelineParams& params) override;
 		void destroy_pipeline(PipelineID pipeline) override;
+
+		[[nodiscard]] QueueID create_queue() override;
+		void destroy_queue(QueueID queue) override;
+
+		[[nodiscard]] CommandPoolID create_command_pool(QueueID queue) override;
+		void destroy_command_pool(CommandPoolID command_pool) override;
+
+		[[nodiscard]] CommandBufferID create_command_buffer(CommandPoolID pool) override;
+		void begin_command_buffer(CommandBufferID command_buffer) override;
+		void end_command_buffer(CommandBufferID command_buffer) override;
 
 		[[nodiscard]] VkInstance get_instance() const;
 		[[nodiscard]] VkAllocationCallbacks* get_allocator(VkObjectType type) const;

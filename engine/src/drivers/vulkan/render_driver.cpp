@@ -830,6 +830,83 @@ void VulkanRenderDriver::destroy_pipeline(PipelineID p_pipeline) {
 	delete p_pipeline;
 }
 
+QueueID VulkanRenderDriver::create_queue() {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(m_device);
+	// TODO: Actually create/get a queue
+	Queue* queue = new Queue();
+	queue->family_index = 0;
+	return queue;
+}
+
+void VulkanRenderDriver::destroy_queue(QueueID p_queue) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_queue);
+	delete p_queue;
+}
+
+CommandPoolID VulkanRenderDriver::create_command_pool(QueueID p_queue) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_queue);
+	CommandPool* pool = new CommandPool();
+
+	VkCommandPoolCreateInfo create {};
+	create.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	create.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; // TODO: Support other pool type
+	create.queueFamilyIndex = p_queue->family_index;
+
+	if (vkCreateCommandPool(m_device, &create, get_allocator(VK_OBJECT_TYPE_COMMAND_POOL), &pool->handle) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create command pool");
+	}
+
+	NOVA_LOG("VkCommandPool created");
+	return pool;
+}
+
+void VulkanRenderDriver::destroy_command_pool(CommandPoolID p_command_pool) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_command_pool);
+	if (p_command_pool->handle) {
+		vkDestroyCommandPool(m_device, p_command_pool->handle, get_allocator(VK_OBJECT_TYPE_COMMAND_POOL));
+	}
+	for (const CommandBufferID buffer : p_command_pool->allocated_buffers) {
+		delete buffer;
+	}
+	delete p_command_pool;
+}
+
+CommandBufferID VulkanRenderDriver::create_command_buffer(CommandPoolID p_pool) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_pool);
+	CommandBuffer* buffer = new CommandBuffer();
+
+	VkCommandBufferAllocateInfo alloc {};
+	alloc.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	alloc.commandPool = p_pool->handle;
+	alloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY; // TODO: Support other buffer levels
+	alloc.commandBufferCount = 1;
+
+	if (vkAllocateCommandBuffers(m_device, &alloc, &buffer->handle) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to allocate command buffer");
+	}
+
+	NOVA_LOG("VkCommandBuffer created");
+	p_pool->allocated_buffers.push_back(buffer);
+	return nullptr;
+}
+
+void VulkanRenderDriver::begin_command_buffer(CommandBufferID p_command_buffer) {
+	VkCommandBufferBeginInfo info {};
+	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	// TODO: Support flag options
+	vkBeginCommandBuffer(p_command_buffer->handle, &info);
+	// TODO: Check result
+};
+
+void VulkanRenderDriver::end_command_buffer(CommandBufferID p_command_buffer) {
+	vkEndCommandBuffer(p_command_buffer->handle);
+}
+
 VkInstance VulkanRenderDriver::get_instance() const {
 	return m_instance;
 }

@@ -15,7 +15,6 @@
 #include <string>
 
 namespace Nova {
-
 	class NOVA_API RenderDriver {
 	  public:
 		static RenderDriver* create(RenderAPI api, WindowDriver* window_driver = nullptr);
@@ -48,5 +47,15 @@ namespace Nova {
 		[[nodiscard]] virtual PipelineID create_pipeline(GraphicsPipelineParams& params) = 0;
 		[[nodiscard]] virtual PipelineID create_pipeline(ComputePipelineParams& params) = 0;
 		virtual void destroy_pipeline(PipelineID pipeline) = 0;
+
+		[[nodiscard]] virtual QueueID create_queue() = 0;
+		virtual void destroy_queue(QueueID queue) = 0;
+
+		[[nodiscard]] virtual CommandPoolID create_command_pool(QueueID queue) = 0;
+		virtual void destroy_command_pool(CommandPoolID command_pool) = 0;
+
+		[[nodiscard]] virtual CommandBufferID create_command_buffer(CommandPoolID pool) = 0;
+		virtual void begin_command_buffer(CommandBufferID command_buffer) = 0;
+		virtual void end_command_buffer(CommandBufferID command_buffer) = 0;
 	};
 } // namespace Nova
