@@ -8,12 +8,14 @@
 #include <nova/render/render_device.h>
 #include <nova/render/render_driver.h>
 
+#include <limits>
+
 using namespace Nova;
 
 u32 RenderDevice::choose_device(RenderDriver* p_driver, std::span<const SurfaceID> p_surfaces) {
 	NOVA_AUTO_TRACE();
 
-	u32 best_index = -1;
+	u32 best_index = std::numeric_limits<u32>::max();
 	u32 best_score = 0;
 
 	for (u32 i = 0; i < p_driver->get_device_count(); i++) {
@@ -53,7 +55,7 @@ u32 RenderDevice::choose_device(RenderDriver* p_driver, std::span<const SurfaceI
 		}
 	}
 
-	if (best_index == -1U) {
+	if (best_index == std::numeric_limits<u32>::max()) {
 		throw std::runtime_error("No suitable render device found");
 	}
 
