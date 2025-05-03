@@ -76,6 +76,8 @@ namespace Nova {
 		[[nodiscard]] bool get_device_supports_surface(u32 index, SurfaceID surface) const override;
 		void select_device(u32 index) override;
 
+		[[nodiscard]] QueueID get_queue() override;
+
 		[[nodiscard]] SurfaceID create_surface(WindowID window) override;
 		void destroy_surface(SurfaceID surface) override;
 
@@ -93,9 +95,6 @@ namespace Nova {
 		[[nodiscard]] PipelineID create_pipeline(GraphicsPipelineParams& params) override;
 		[[nodiscard]] PipelineID create_pipeline(ComputePipelineParams& params) override;
 		void destroy_pipeline(PipelineID pipeline) override;
-
-		[[nodiscard]] QueueID create_queue() override;
-		void destroy_queue(QueueID queue) override;
 
 		[[nodiscard]] CommandPoolID create_command_pool(QueueID queue) override;
 		void destroy_command_pool(CommandPoolID command_pool) override;

@@ -375,6 +375,15 @@ void VulkanRenderDriver::select_device(const u32 p_index) {
 	_init_device(queues);
 }
 
+QueueID VulkanRenderDriver::get_queue() {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(m_device);
+	// TODO: Actually create/get a queue
+	Queue* queue = new Queue();
+	queue->family_index = 0;
+	return queue;
+}
+
 SurfaceID VulkanRenderDriver::create_surface(WindowID p_window) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(m_window_driver);
@@ -456,6 +465,7 @@ SwapchainID VulkanRenderDriver::create_swapchain(SurfaceID p_surface) {
 
 	// TODO: Change VkRenderPass to VkRenderPass2KHR (Vulkan 1.2+)
 
+	resize_swapchain(swapchain);
 	return swapchain;
 }
 
@@ -607,7 +617,6 @@ void VulkanRenderDriver::destroy_swapchain(SwapchainID p_swapchain) {
 	}
 	if (p_swapchain->render_pass) {
 		destroy_render_pass(p_swapchain->render_pass);
-		p_swapchain->render_pass = nullptr;
 	}
 
 	delete p_swapchain;
@@ -677,7 +686,6 @@ PipelineID VulkanRenderDriver::create_pipeline(GraphicsPipelineParams& p_params)
 	}
 
 	std::vector<VkVertexInputBindingDescription> vertex_bindings;
-	std::vector<VkVertexInputAttributeDescription> vertex_attributes;
 	for (const auto& binding : p_params.bindings) {
 		VkVertexInputBindingDescription binding_desc {};
 		binding_desc.binding = binding.binding;
@@ -685,6 +693,7 @@ PipelineID VulkanRenderDriver::create_pipeline(GraphicsPipelineParams& p_params)
 		binding_desc.inputRate = VK_VERTEX_INPUT_RATE_MAP[static_cast<int>(binding.rate)];
 		vertex_bindings.push_back(binding_desc);
 	}
+	std::vector<VkVertexInputAttributeDescription> vertex_attributes;
 	for (const auto& attribute : p_params.attributes) {
 		VkVertexInputAttributeDescription attribute_desc {};
 		attribute_desc.binding = attribute.binding;
@@ -830,21 +839,6 @@ void VulkanRenderDriver::destroy_pipeline(PipelineID p_pipeline) {
 	delete p_pipeline;
 }
 
-QueueID VulkanRenderDriver::create_queue() {
-	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_device);
-	// TODO: Actually create/get a queue
-	Queue* queue = new Queue();
-	queue->family_index = 0;
-	return queue;
-}
-
-void VulkanRenderDriver::destroy_queue(QueueID p_queue) {
-	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(p_queue);
-	delete p_queue;
-}
-
 CommandPoolID VulkanRenderDriver::create_command_pool(QueueID p_queue) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(p_queue);
@@ -892,10 +886,11 @@ CommandBufferID VulkanRenderDriver::create_command_buffer(CommandPoolID p_pool) 
 
 	NOVA_LOG("VkCommandBuffer created");
 	p_pool->allocated_buffers.push_back(buffer);
-	return nullptr;
+	return buffer;
 }
 
 void VulkanRenderDriver::begin_command_buffer(CommandBufferID p_command_buffer) {
+	NOVA_ASSERT(p_command_buffer);
 	VkCommandBufferBeginInfo info {};
 	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	// TODO: Support flag options

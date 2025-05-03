@@ -30,6 +30,8 @@ namespace Nova {
 		[[nodiscard]] virtual bool get_device_supports_surface(u32 index, SurfaceID surface) const = 0;
 		virtual void select_device(u32 index) = 0;
 
+		[[nodiscard]] virtual QueueID get_queue() = 0;
+
 		[[nodiscard]] virtual SurfaceID create_surface(WindowID window) = 0;
 		virtual void destroy_surface(SurfaceID surface) = 0;
 
@@ -47,9 +49,6 @@ namespace Nova {
 		[[nodiscard]] virtual PipelineID create_pipeline(GraphicsPipelineParams& params) = 0;
 		[[nodiscard]] virtual PipelineID create_pipeline(ComputePipelineParams& params) = 0;
 		virtual void destroy_pipeline(PipelineID pipeline) = 0;
-
-		[[nodiscard]] virtual QueueID create_queue() = 0;
-		virtual void destroy_queue(QueueID queue) = 0;
 
 		[[nodiscard]] virtual CommandPoolID create_command_pool(QueueID queue) = 0;
 		virtual void destroy_command_pool(CommandPoolID command_pool) = 0;
