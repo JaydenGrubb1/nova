@@ -12,6 +12,7 @@ namespace Nova {
 	enum class InputRate { VERTEX, INSTANCE };
 	enum class PipelineType { GRAPHICS, COMPUTE };
 	enum class PrimitiveTopology { POINT_LIST, LINE_LIST, LINE_STRIP, TRIANGLE_LIST, TRIANGLE_STRIP };
+	enum class QueueType { UNDEFINED, GRAPHICS, COMPUTE, TRANSFER };
 	enum class RenderAPI { DX12, VULKAN };
 	enum class ShaderStage { VERTEX, FRAGMENT, GEOMETRY, TESS_CONTROL, TESS_EVAL, COMPUTE, MESH, TASK };
 

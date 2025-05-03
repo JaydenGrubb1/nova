@@ -30,7 +30,9 @@ namespace Nova {
 		[[nodiscard]] virtual bool get_device_supports_surface(u32 index, SurfaceID surface) const = 0;
 		virtual void select_device(u32 index) = 0;
 
-		[[nodiscard]] virtual QueueID get_queue() = 0;
+		[[nodiscard]] virtual u32 choose_queue_family(QueueType type, SurfaceID surface) = 0;
+		[[nodiscard]] virtual QueueID get_queue(u32 queue_family) = 0;
+		virtual void free_queue(QueueID queue) = 0;
 
 		[[nodiscard]] virtual SurfaceID create_surface(WindowID window) = 0;
 		virtual void destroy_surface(SurfaceID surface) = 0;

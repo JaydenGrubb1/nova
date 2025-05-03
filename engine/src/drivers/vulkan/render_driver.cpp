@@ -16,11 +16,12 @@
 #include <vulkan/vulkan.h>
 
 #include <algorithm>
+#include <bit>
 #include <format>
 #include <limits>
-#include <unordered_map>
 
 #define VALIDATION_LAYER "VK_LAYER_KHRONOS_validation"
+#define MAX_QUEUES_PER_FAMILY 2U
 
 using namespace Nova;
 
@@ -59,6 +60,13 @@ static constexpr VkFrontFace VK_FRONT_FACE_MAP[] = {
 static constexpr VkVertexInputRate VK_VERTEX_INPUT_RATE_MAP[] = {
 	VK_VERTEX_INPUT_RATE_VERTEX,
 	VK_VERTEX_INPUT_RATE_INSTANCE
+};
+
+static constexpr VkQueueFlagBits VK_QUEUE_FLAGS_MAP[] = {
+	static_cast<VkQueueFlagBits>(0),
+	VK_QUEUE_GRAPHICS_BIT,
+	VK_QUEUE_COMPUTE_BIT,
+	VK_QUEUE_TRANSFER_BIT
 };
 
 // clang-format on
@@ -375,13 +383,64 @@ void VulkanRenderDriver::select_device(const u32 p_index) {
 	_init_device(queues);
 }
 
-QueueID VulkanRenderDriver::get_queue() {
+u32 VulkanRenderDriver::choose_queue_family(QueueType p_type, SurfaceID p_surface) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_device);
-	// TODO: Actually create/get a queue
-	Queue* queue = new Queue();
-	queue->family_index = 0;
-	return queue;
+	NOVA_ASSERT(!m_queue_families.empty());
+
+	const VkQueueFlags mask = VK_QUEUE_FLAGS_MAP[static_cast<int>(p_type)];
+
+	u32 best_index = std::numeric_limits<u32>::max();
+	u32 best_score = std::numeric_limits<u32>::max();
+
+	for (const auto [index, flags] : m_queue_families) {
+		if ((flags & mask) != mask) {
+			continue;
+		}
+		if (p_surface) {
+			VkBool32 supports_surface;
+			vkGetPhysicalDeviceSurfaceSupportKHR(m_physical_device, index, p_surface->handle, &supports_surface);
+			if (!supports_surface) {
+				continue;
+			}
+		}
+
+		u32 score = std::popcount(flags);
+		if (score < best_score) {
+			best_index = index;
+			best_score = score;
+		}
+	}
+
+	return best_index;
+}
+
+QueueID VulkanRenderDriver::get_queue(u32 p_queue_family) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(m_queue_families.contains(p_queue_family));
+
+	QueueID best_queue = nullptr;
+	u32 best_usage = std::numeric_limits<u32>::max();
+
+	for (Queue& queue : m_queues) {
+		if (queue.family_index != p_queue_family) {
+			continue;
+		}
+		if (queue.usage_count < best_usage) {
+			best_queue = &queue;
+			best_usage = queue.usage_count;
+		}
+	}
+
+	if (best_queue) {
+		best_queue->usage_count++;
+	}
+	return best_queue;
+}
+
+void VulkanRenderDriver::free_queue(QueueID p_queue) {
+	NOVA_AUTO_TRACE();
+	NOVA_ASSERT(p_queue);
+	p_queue->usage_count--;
 }
 
 SurfaceID VulkanRenderDriver::create_surface(WindowID p_window) {
@@ -1113,7 +1172,7 @@ void VulkanRenderDriver::_check_device_capabilities() {
 	// TODO: Check device capabilities
 }
 
-void VulkanRenderDriver::_init_queues(std::vector<VkDeviceQueueCreateInfo>& p_queues) const {
+void VulkanRenderDriver::_init_queues(std::vector<VkDeviceQueueCreateInfo>& p_queues) {
 	NOVA_AUTO_TRACE();
 
 	u32 count;
@@ -1136,13 +1195,21 @@ void VulkanRenderDriver::_init_queues(std::vector<VkDeviceQueueCreateInfo>& p_qu
 		NOVA_LOG("Using queue family: {}", i);
 		found |= available[i].queueFlags;
 
-		VkDeviceQueueCreateInfo queue {};
-		queue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queue.queueFamilyIndex = i;
-		queue.queueCount = 1;
-		queue.pQueuePriorities = &s_priority;
+		VkDeviceQueueCreateInfo create {};
+		create.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		create.queueFamilyIndex = i;
+		create.queueCount = std::min(MAX_QUEUES_PER_FAMILY, available[i].queueCount);
+		create.pQueuePriorities = &s_priority;
 
-		p_queues.push_back(queue);
+		p_queues.push_back(create);
+		m_queue_families[i] = available[i].queueFlags;
+
+		for (u32 j = 0; j < create.queueCount; j++) {
+			Queue queue;
+			queue.family_index = i;
+			queue.queue_index = j;
+			m_queues.push_back(queue);
+		}
 	}
 
 	if ((found & QUEUE_MASK) != QUEUE_MASK) {
@@ -1162,10 +1229,13 @@ void VulkanRenderDriver::_init_device(const std::vector<VkDeviceQueueCreateInfo>
 	create.queueCreateInfoCount = static_cast<u32>(p_queues.size());
 	create.pQueueCreateInfos = p_queues.data();
 	create.pEnabledFeatures = &m_features;
-	// TODO: pNext for additional features
 
 	if (vkCreateDevice(m_physical_device, &create, get_allocator(VK_OBJECT_TYPE_DEVICE), &m_device) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create VkDevice");
+	}
+
+	for (Queue& queue : m_queues) {
+		vkGetDeviceQueue(m_device, queue.family_index, queue.queue_index, &queue.handle);
 	}
 
 	NOVA_LOG("VkDevice created");

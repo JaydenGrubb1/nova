@@ -11,6 +11,7 @@
 #include <nova/render/render_driver.h>
 #include <vulkan/vulkan.h>
 
+#include <unordered_map>
 #include <vector>
 
 namespace Nova {
@@ -30,7 +31,10 @@ namespace Nova {
 	};
 
 	struct Queue {
+		VkQueue handle = VK_NULL_HANDLE;
 		u32 family_index;
+		u32 queue_index;
+		u32 usage_count = 0;
 	};
 
 	struct RenderPass {
@@ -76,7 +80,9 @@ namespace Nova {
 		[[nodiscard]] bool get_device_supports_surface(u32 index, SurfaceID surface) const override;
 		void select_device(u32 index) override;
 
-		[[nodiscard]] QueueID get_queue() override;
+		[[nodiscard]] u32 choose_queue_family(QueueType type, SurfaceID surface) override;
+		[[nodiscard]] QueueID get_queue(u32 queue_family) override;
+		void free_queue(QueueID queue) override;
 
 		[[nodiscard]] SurfaceID create_surface(WindowID window) override;
 		void destroy_surface(SurfaceID surface) override;
@@ -117,6 +123,8 @@ namespace Nova {
 		std::vector<const char*> m_layers;
 		std::vector<const char*> m_device_extensions;
 		std::vector<RenderDevice> m_devices;
+		std::vector<Queue> m_queues;
+		std::unordered_map<u32, VkQueueFlags> m_queue_families;
 
 		void _check_version() const;
 		void _check_extensions();
@@ -127,7 +135,7 @@ namespace Nova {
 		void _check_device_extensions();
 		void _check_device_features();
 		void _check_device_capabilities();
-		void _init_queues(std::vector<VkDeviceQueueCreateInfo>& queues) const;
+		void _init_queues(std::vector<VkDeviceQueueCreateInfo>& queues);
 		void _init_device(const std::vector<VkDeviceQueueCreateInfo>& queues);
 	};
 } // namespace Nova
