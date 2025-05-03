@@ -12,6 +12,7 @@
 #include <nova/types.h>
 
 #include <cstdlib>
+#include <limits>
 #include <vector>
 
 using namespace Nova;
@@ -145,8 +146,18 @@ int main() {
 
 		rd->select_device(RenderDevice::choose_device(rd, surface));
 
+		u32 graphics_idx = rd->choose_queue_family(QueueType::GRAPHICS, surface);
+		u32 present_idx = graphics_idx;
+
+		if (graphics_idx == std::numeric_limits<u32>::max()) {
+			graphics_idx = rd->choose_queue_family(QueueType::GRAPHICS, nullptr);
+			present_idx = rd->choose_queue_family(QueueType::UNDEFINED, surface);
+		}
+
+		QueueID graphics_queue = rd->get_queue(graphics_idx);
+		QueueID presents_queue = rd->get_queue(present_idx);
+
 		SwapchainID swapchain = rd->create_swapchain(surface);
-		rd->resize_swapchain(swapchain);
 
 		ShaderID frag = rd->create_shader(frag_bytes, ShaderStage::FRAGMENT);
 		ShaderID vert = rd->create_shader(vert_bytes, ShaderStage::VERTEX);
@@ -157,15 +168,22 @@ int main() {
 		params.render_pass = rd->get_swapchain_render_pass(swapchain);
 
 		PipelineID pipeline = rd->create_pipeline(params);
+		CommandPoolID pool = rd->create_command_pool(graphics_queue);
+		CommandBufferID cmd = rd->create_command_buffer(pool);
+
+		(void)cmd;
 
 		while (wd->get_window_count() > 0) {
 			wd->poll_events();
 		}
 
+		rd->destroy_command_pool(pool);
 		rd->destroy_pipeline(pipeline);
 		rd->destroy_shader(vert);
 		rd->destroy_shader(frag);
 		rd->destroy_swapchain(swapchain);
+		rd->free_queue(presents_queue);
+		rd->free_queue(graphics_queue);
 		rd->destroy_surface(surface);
 
 		delete rd;
