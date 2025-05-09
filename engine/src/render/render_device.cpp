@@ -18,6 +18,8 @@ u32 RenderDevice::choose_device(RenderDriver* p_driver, std::span<const SurfaceI
 	u32 best_index = std::numeric_limits<u32>::max();
 	u32 best_score = 0;
 
+	const bool prefer_discrete = true; // TODO: Get from config
+
 	for (u32 i = 0; i < p_driver->get_device_count(); i++) {
 		auto& device = p_driver->get_device(i);
 		u32 score = 1;
@@ -34,10 +36,10 @@ u32 RenderDevice::choose_device(RenderDriver* p_driver, std::span<const SurfaceI
 
 		switch (device.type) {
 			case Type::DISCRETE:
-				score += 4;
+				score += prefer_discrete ? 4 : 3;
 				break;
 			case Type::INTEGRATED:
-				score += 3;
+				score += prefer_discrete ? 3 : 4;
 				break;
 			case Type::VIRTUAL:
 				score += 2;
