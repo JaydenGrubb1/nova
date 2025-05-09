@@ -8,6 +8,7 @@
 #include <nova/render/render_device.h>
 #include <nova/render/render_driver.h>
 
+#include <algorithm>
 #include <limits>
 
 using namespace Nova;
@@ -24,13 +25,9 @@ u32 RenderDevice::choose_device(RenderDriver* p_driver, std::span<const SurfaceI
 		auto& device = p_driver->get_device(i);
 		u32 score = 1;
 
-		for (SurfaceID surface : p_surfaces) {
-			if (!p_driver->get_device_supports_surface(i, surface)) {
-				score = 0;
-				break;
-			}
-		}
-		if (score == 0) {
+		if (!std::all_of(p_surfaces.begin(), p_surfaces.end(), [&](SurfaceID surface) {
+				return p_driver->get_device_supports_surface(i, surface);
+			})) {
 			continue;
 		}
 
