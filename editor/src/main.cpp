@@ -135,7 +135,11 @@ std::vector<u8> vert_bytes = {
 };
 
 int main() {
-	Debug::get_logger()->set_level(spdlog::level::trace);
+	if (Debug::is_debug()) {
+		Debug::get_logger()->set_level(spdlog::level::trace);
+	} else {
+		Debug::get_logger()->set_level(spdlog::level::info);
+	}
 
 	try {
 		WindowDriver* wd = WindowDriver::create();

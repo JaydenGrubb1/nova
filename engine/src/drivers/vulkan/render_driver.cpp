@@ -604,8 +604,6 @@ void VulkanRenderDriver::resize_swapchain(SwapchainID p_swapchain) {
 		throw std::runtime_error("Failed to create swapchain");
 	}
 
-	NOVA_LOG("VkSwapchainKHR created");
-
 	vkGetSwapchainImagesKHR(m_device, p_swapchain->handle, &image_count, nullptr); // TODO: Check result
 	p_swapchain->images.resize(image_count);
 	vkGetSwapchainImagesKHR(m_device, p_swapchain->handle, &image_count, p_swapchain->images.data()); // TODO: Check result
@@ -699,7 +697,6 @@ ShaderID VulkanRenderDriver::create_shader(const std::span<u8> p_bytes, ShaderSt
 		throw std::runtime_error("Failed to create shader module");
 	}
 
-	NOVA_LOG("VkShaderModule created");
 	return shader;
 }
 
@@ -867,7 +864,6 @@ PipelineID VulkanRenderDriver::create_pipeline(GraphicsPipelineParams& p_params)
 		throw std::runtime_error("Failed to create graphics pipeline");
 	}
 
-	NOVA_LOG("VkPipeline created");
 	return pipeline;
 }
 
@@ -912,7 +908,6 @@ CommandPoolID VulkanRenderDriver::create_command_pool(QueueID p_queue) {
 		throw std::runtime_error("Failed to create command pool");
 	}
 
-	NOVA_LOG("VkCommandPool created");
 	return pool;
 }
 
@@ -943,7 +938,6 @@ CommandBufferID VulkanRenderDriver::create_command_buffer(CommandPoolID p_pool) 
 		throw std::runtime_error("Failed to allocate command buffer");
 	}
 
-	NOVA_LOG("VkCommandBuffer created");
 	p_pool->allocated_buffers.push_back(buffer);
 	return buffer;
 }
@@ -1003,7 +997,6 @@ void VulkanRenderDriver::_check_extensions() {
 	requested[surface_extension] = true;
 
 	// Add optional extensions
-	requested[VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME] = false;
 	if (Debug::is_debug()) {
 		requested[VK_EXT_DEBUG_REPORT_EXTENSION_NAME] = false;
 		requested[VK_EXT_DEBUG_UTILS_EXTENSION_NAME] = false;
@@ -1086,8 +1079,6 @@ void VulkanRenderDriver::_init_instance() {
 	if (vkCreateInstance(&create, get_allocator(VK_OBJECT_TYPE_INSTANCE), &m_instance) != VK_SUCCESS) {
 		throw std::runtime_error("Failed to create VkInstance");
 	}
-
-	NOVA_LOG("VkInstance created");
 }
 
 void VulkanRenderDriver::_init_hardware() {
@@ -1237,8 +1228,6 @@ void VulkanRenderDriver::_init_device(const std::vector<VkDeviceQueueCreateInfo>
 	for (Queue& queue : m_queues) {
 		vkGetDeviceQueue(m_device, queue.family_index, queue.queue_index, &queue.handle);
 	}
-
-	NOVA_LOG("VkDevice created");
 }
 
 #endif // NOVA_VULKAN
