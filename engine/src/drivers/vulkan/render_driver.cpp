@@ -351,19 +351,23 @@ bool VulkanRenderDriver::get_device_supports_surface(const u32 p_index, SurfaceI
 	NOVA_ASSERT(p_index < m_devices.size());
 	NOVA_ASSERT(p_surface);
 
-	// TODO: Check other queue families?
+	VkPhysicalDevice physical_device = static_cast<VkPhysicalDevice>(m_devices[p_index].handle);
 
-	VkBool32 supported = false;
-	if (vkGetPhysicalDeviceSurfaceSupportKHR(
-			static_cast<VkPhysicalDevice>(m_devices[p_index].handle),
-			0,
-			p_surface->handle,
-			&supported
-		)
-		!= VK_SUCCESS) {
-		return false;
+	u32 count;
+	vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &count, nullptr);
+
+	for (u32 i = 0; i < count; i++) {
+		VkBool32 supports_present = VK_FALSE;
+		if (vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, p_surface->handle, &supports_present)
+			!= VK_SUCCESS) {
+			continue;
+		}
+		if (supports_present) {
+			return true;
+		}
 	}
-	return supported;
+
+	return false;
 }
 
 void VulkanRenderDriver::select_device(const u32 p_index) {
@@ -397,9 +401,12 @@ u32 VulkanRenderDriver::choose_queue_family(QueueType p_type, SurfaceID p_surfac
 			continue;
 		}
 		if (p_surface) {
-			VkBool32 supports_surface;
-			vkGetPhysicalDeviceSurfaceSupportKHR(m_physical_device, index, p_surface->handle, &supports_surface);
-			if (!supports_surface) {
+			VkBool32 supports_present = VK_FALSE;
+			if (vkGetPhysicalDeviceSurfaceSupportKHR(m_physical_device, index, p_surface->handle, &supports_present)
+				!= VK_SUCCESS) {
+				continue;
+			}
+			if (!supports_present) {
 				continue;
 			}
 		}
@@ -416,7 +423,7 @@ u32 VulkanRenderDriver::choose_queue_family(QueueType p_type, SurfaceID p_surfac
 
 QueueID VulkanRenderDriver::get_queue(u32 p_queue_family) {
 	NOVA_AUTO_TRACE();
-	NOVA_ASSERT(m_queue_families.contains(p_queue_family));
+	NOVA_ASSERT(!m_queues.empty());
 
 	QueueID best_queue = nullptr;
 	u32 best_usage = std::numeric_limits<u32>::max();
@@ -431,9 +438,11 @@ QueueID VulkanRenderDriver::get_queue(u32 p_queue_family) {
 		}
 	}
 
-	if (best_queue) {
-		best_queue->usage_count++;
+	if (!best_queue) {
+		throw std::runtime_error("Failed to find a queue");
 	}
+
+	best_queue->usage_count++;
 	return best_queue;
 }
 
