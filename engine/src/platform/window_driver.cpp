@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "drivers/wayland/window_driver.h" // IWYU pragma: keep
-#include "drivers/win32/window_driver.h" // IWYU pragma: keep
-#include "drivers/x11/window_driver.h" // IWYU pragma: keep
+#include "platform/linux/wayland/window_driver.h" // IWYU pragma: keep
+#include "platform/linux/x11/window_driver.h" // IWYU pragma: keep
+#include "platform/windows/window_driver.h" // IWYU pragma: keep
 
 #include <nova/core/debug.h>
 #include <nova/platform/window_driver.h>

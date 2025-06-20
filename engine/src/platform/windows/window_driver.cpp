@@ -6,7 +6,7 @@
 
 #ifdef NOVA_WINDOWS
 
-#include "drivers/win32/window_driver.h"
+#include "platform/windows/window_driver.h"
 
 #ifdef NOVA_VULKAN
 #include <vulkan/vulkan.h>

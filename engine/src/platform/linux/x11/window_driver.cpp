@@ -6,7 +6,7 @@
 
 #ifdef NOVA_X11
 
-#include "drivers/x11/window_driver.h"
+#include "platform/linux/x11/window_driver.h"
 
 #ifdef NOVA_VULKAN
 #include "drivers/vulkan/render_driver.h"

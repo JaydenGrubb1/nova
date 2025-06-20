@@ -6,7 +6,7 @@
 
 #ifdef NOVA_WAYLAND
 
-#include "drivers/wayland/window_driver.h"
+#include "platform/linux/wayland/window_driver.h"
 
 #ifdef NOVA_VULKAN
 #include <vulkan/vulkan.h>
