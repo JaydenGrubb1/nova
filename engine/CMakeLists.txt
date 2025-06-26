@@ -27,7 +27,6 @@ set(ENGINE_SRC
 	platform/linux/x11/window_driver.cpp
 	platform/windows/window_driver.cpp
 	platform/window_driver.cpp
-	render/renderer.cpp
 	render/render_device.cpp
 	render/render_driver.cpp
 )

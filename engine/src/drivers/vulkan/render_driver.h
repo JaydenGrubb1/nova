@@ -9,62 +9,13 @@
 #ifdef NOVA_VULKAN
 
 #include <nova/render/render_driver.h>
+
 #include <vulkan/vulkan.h>
 
 #include <unordered_map>
 #include <vector>
 
 namespace Nova {
-	struct CommandBuffer {
-		VkCommandBuffer handle = VK_NULL_HANDLE;
-	};
-
-	struct CommandPool {
-		VkCommandPool handle = VK_NULL_HANDLE;
-		std::vector<CommandBufferID> allocated_buffers;
-	};
-
-	struct Pipeline {
-		PipelineType type;
-		VkPipeline handle = VK_NULL_HANDLE;
-		VkPipelineLayout layout = VK_NULL_HANDLE;
-	};
-
-	struct Queue {
-		VkQueue handle = VK_NULL_HANDLE;
-		u32 family_index;
-		u32 queue_index;
-		u32 usage_count = 0;
-	};
-
-	struct RenderPass {
-		VkRenderPass handle = VK_NULL_HANDLE;
-	};
-
-	struct Shader {
-		VkShaderModule handle = VK_NULL_HANDLE;
-		ShaderStage stage = ShaderStage::VERTEX;
-		std::string name;
-	};
-
-	struct Surface {
-		VkSurfaceKHR handle = VK_NULL_HANDLE;
-		u32 width = 0;
-		u32 height = 0;
-		bool dirty = false; // TODO: Use state enum
-	};
-
-	struct Swapchain {
-		VkSwapchainKHR handle = VK_NULL_HANDLE;
-		VkFormat format = VK_FORMAT_UNDEFINED;
-		VkColorSpaceKHR color_space = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-		std::vector<VkImage> images;
-		std::vector<VkImageView> image_views;
-		std::vector<VkFramebuffer> framebuffers;
-		SurfaceID surface = nullptr;
-		RenderPassID render_pass = nullptr;
-	};
-
 	class VulkanRenderDriver final : public RenderDriver {
 	  public:
 		explicit VulkanRenderDriver(WindowDriver* window_driver);
@@ -81,7 +32,7 @@ namespace Nova {
 		void select_device(u32 index) override;
 
 		u32 choose_queue_family(QueueType type, SurfaceID surface) override;
-		
+
 		[[nodiscard]] QueueID get_queue(u32 queue_family) override;
 		void free_queue(QueueID queue) override;
 

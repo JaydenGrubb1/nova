@@ -7,7 +7,7 @@
 #pragma once
 
 #include <nova/api.h>
-#include <nova/render/render_fwd.h>
+#include <nova/render/render_structs.h>
 #include <nova/types.h>
 
 #include <initializer_list>
@@ -15,13 +15,15 @@
 #include <string>
 
 namespace Nova {
-	struct NOVA_API RenderDevice {
-		enum class Vendor { UNKNOWN = 0, INTEL = 0x8086, AMD = 0x1002, NVIDIA = 0x10de };
-		enum class Type { OTHER = 0, INTEGRATED = 1, DISCRETE = 2, VIRTUAL = 3, CPU = 4 };
+	class RenderDriver;
 
+	enum class DeviceVendor { UNKNOWN = 0, INTEL = 0x8086, AMD = 0x1002, NVIDIA = 0x10de };
+	enum class DeviceType { OTHER = 0, INTEGRATED = 1, DISCRETE = 2, VIRTUAL = 3, CPU = 4 };
+
+	struct NOVA_API RenderDevice {
 		std::string name;
-		Vendor vendor;
-		Type type;
+		DeviceVendor vendor;
+		DeviceType type;
 		u32 deviceID;
 		void* handle;
 

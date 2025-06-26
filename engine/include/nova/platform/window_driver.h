@@ -7,13 +7,17 @@
 #pragma once
 
 #include <nova/api.h>
-#include <nova/platform/window_fwd.h>
-#include <nova/render/render_fwd.h>
+#include <nova/platform/platform_structs.h>
+#include <nova/render/render_structs.h>
 #include <nova/types.h>
 
 #include <string_view>
 
 namespace Nova {
+	class RenderDriver;
+
+	enum class WindowAPI { WAYLAND, WINDOWS, X11 };
+
 	class NOVA_API WindowDriver {
 	  public:
 		static WindowDriver* create();

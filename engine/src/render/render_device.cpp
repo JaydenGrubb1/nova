@@ -32,16 +32,16 @@ u32 RenderDevice::choose_device(RenderDriver* p_driver, std::span<const SurfaceI
 		}
 
 		switch (device.type) {
-			case Type::DISCRETE:
+			case DeviceType::DISCRETE:
 				score += prefer_discrete ? 4 : 3;
 				break;
-			case Type::INTEGRATED:
+			case DeviceType::INTEGRATED:
 				score += prefer_discrete ? 3 : 4;
 				break;
-			case Type::VIRTUAL:
+			case DeviceType::VIRTUAL:
 				score += 2;
 				break;
-			case Type::CPU:
+			case DeviceType::CPU:
 				score += 1;
 				break;
 			default:

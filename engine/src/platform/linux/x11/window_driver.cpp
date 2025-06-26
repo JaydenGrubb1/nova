@@ -8,8 +8,12 @@
 
 #include "platform/linux/x11/window_driver.h"
 
+#include "platform/linux/x11/window_structs.h"
+#include "platform/linux/x11/wrapper.h"
+
 #ifdef NOVA_VULKAN
 #include "drivers/vulkan/render_driver.h"
+#include "drivers/vulkan/render_structs.h"
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_xlib.h>

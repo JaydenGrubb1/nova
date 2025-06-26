@@ -6,12 +6,18 @@
 
 #pragma once
 
-#include <nova/render/render_fwd.h>
+#include <nova/render/data_format.h>
+#include <nova/render/render_structs.h>
 #include <nova/types.h>
 
 #include <vector>
 
 namespace Nova {
+	enum class CullMode { NONE, FRONT, BACK };
+	enum class FrontFace { CLOCKWISE, COUNTER_CLOCKWISE };
+	enum class InputRate { VERTEX, INSTANCE };
+	enum class PrimitiveTopology { POINT_LIST, LINE_LIST, LINE_STRIP, TRIANGLE_LIST, TRIANGLE_STRIP };
+
 	struct VertexAttribute {
 		u32 binding = 0;
 		u32 location = 0;
@@ -24,8 +30,6 @@ namespace Nova {
 		u32 stride = 0;
 		InputRate rate = InputRate::VERTEX;
 	};
-
-	struct RenderPassParams {};
 
 	struct GraphicsPipelineParams {
 		std::vector<ShaderID> shaders;
@@ -54,6 +58,4 @@ namespace Nova {
 		RenderPassID render_pass = nullptr;
 		u32 subpass = 0;
 	};
-
-	struct ComputePipelineParams {};
 } // namespace Nova

@@ -7,14 +7,25 @@
 #pragma once
 
 #include <nova/api.h>
-#include <nova/platform/window_fwd.h>
-#include <nova/render/render_fwd.h>
+#include <nova/platform/platform_structs.h>
+#include <nova/render/params/compute_pipeline.h>
+#include <nova/render/params/graphics_pipeline.h>
+#include <nova/render/params/render_pass.h>
+#include <nova/render/render_device.h>
+#include <nova/render/render_structs.h>
 #include <nova/types.h>
 
 #include <span>
 #include <string>
 
 namespace Nova {
+	class WindowDriver;
+
+	enum class PipelineType { GRAPHICS, COMPUTE };
+	enum class QueueType { UNDEFINED, GRAPHICS, COMPUTE, TRANSFER };
+	enum class RenderAPI { DX12, VULKAN };
+	enum class ShaderStage { VERTEX, FRAGMENT, GEOMETRY, TESS_CONTROL, TESS_EVAL, COMPUTE, MESH, TASK };
+
 	class NOVA_API RenderDriver {
 	  public:
 		static RenderDriver* create(RenderAPI api, WindowDriver* window_driver = nullptr);
@@ -31,7 +42,7 @@ namespace Nova {
 		virtual void select_device(u32 index) = 0;
 
 		virtual u32 choose_queue_family(QueueType type, SurfaceID surface) = 0;
-		
+
 		[[nodiscard]] virtual QueueID get_queue(u32 queue_family) = 0;
 		virtual void free_queue(QueueID queue) = 0;
 

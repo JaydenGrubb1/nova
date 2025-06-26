@@ -7,15 +7,6 @@
 #pragma once
 
 namespace Nova {
-	enum class CullMode { NONE, FRONT, BACK };
-	enum class FrontFace { CLOCKWISE, COUNTER_CLOCKWISE };
-	enum class InputRate { VERTEX, INSTANCE };
-	enum class PipelineType { GRAPHICS, COMPUTE };
-	enum class PrimitiveTopology { POINT_LIST, LINE_LIST, LINE_STRIP, TRIANGLE_LIST, TRIANGLE_STRIP };
-	enum class QueueType { UNDEFINED, GRAPHICS, COMPUTE, TRANSFER };
-	enum class RenderAPI { DX12, VULKAN };
-	enum class ShaderStage { VERTEX, FRAGMENT, GEOMETRY, TESS_CONTROL, TESS_EVAL, COMPUTE, MESH, TASK };
-
 	enum class DataFormat {
 		UNDEFINED,
 		R4G4_UNORM_PACK8,
@@ -237,31 +228,4 @@ namespace Nova {
 		G16_B16R16_2PLANE_422_UNORM,
 		G16_B16_R16_3PLANE_444_UNORM,
 	};
-
-	class RenderDriver;
-	struct RenderDevice;
-
-	struct VertexAttribute;
-	struct VertexBinding;
-	struct RenderPassParams;
-	struct GraphicsPipelineParams;
-	struct ComputePipelineParams;
-
-	struct CommandBuffer;
-	struct CommandPool;
-	struct Pipeline;
-	struct Queue;
-	struct RenderPass;
-	struct Shader;
-	struct Surface;
-	struct Swapchain;
-
-	using CommandBufferID = CommandBuffer*;
-	using CommandPoolID = CommandPool*;
-	using PipelineID = Pipeline*;
-	using QueueID = Queue*;
-	using RenderPassID = RenderPass*;
-	using ShaderID = Shader*;
-	using SurfaceID = Surface*;
-	using SwapchainID = Swapchain*;
 } // namespace Nova

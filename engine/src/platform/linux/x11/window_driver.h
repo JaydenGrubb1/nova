@@ -8,24 +8,13 @@
 
 #ifdef NOVA_X11
 
-#include <X11/Xlib.h>
+#include "platform/linux/x11/wrapper.h"
+
 #include <nova/platform/window_driver.h>
 
 #include <unordered_map>
 
-namespace X11 {
-	using Window = ::Window;
-	using Display = ::Display;
-	using Atom = ::Atom;
-} // namespace X11
-
 namespace Nova {
-	struct Window {
-		X11::Window handle = 0;
-		int width = 0;
-		int height = 0;
-	};
-
 	class X11WindowDriver final : public WindowDriver {
 	  public:
 		X11WindowDriver();
