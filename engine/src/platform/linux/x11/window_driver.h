@@ -31,13 +31,13 @@ namespace Nova {
 		X11WindowDriver();
 		~X11WindowDriver() override;
 
-		[[nodiscard]] WindowAPI get_api() const override;
-		[[nodiscard]] std::string get_api_name() const override;
+		WindowAPI get_api() const override;
+		std::string get_api_name() const override;
 
 		void poll_events() override;
 		void beep() override;
 
-		[[nodiscard]] u32 get_window_count() const override;
+		u32 get_window_count() const override;
 		[[nodiscard]] WindowID create_window(std::string_view title, u32 width, u32 height) override;
 		void destroy_window(WindowID window) override;
 
@@ -45,7 +45,7 @@ namespace Nova {
 		void set_window_size(WindowID window, u32 width, u32 height) override;
 		void set_window_position(WindowID window, i32 x, i32 y) override;
 
-		[[nodiscard]] const char* get_surface_extension() const override;
+		const char* get_surface_extension() const override;
 		[[nodiscard]] SurfaceID create_surface(WindowID window, RenderDriver* driver) override;
 
 	  private:

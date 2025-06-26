@@ -70,17 +70,18 @@ namespace Nova {
 		explicit VulkanRenderDriver(WindowDriver* window_driver);
 		~VulkanRenderDriver() override;
 
-		[[nodiscard]] RenderAPI get_api() const override;
-		[[nodiscard]] u32 get_api_version() const override;
-		[[nodiscard]] std::string get_api_name() const override;
-		[[nodiscard]] std::string get_api_version_string() const override;
+		RenderAPI get_api() const override;
+		u32 get_api_version() const override;
+		std::string get_api_name() const override;
+		std::string get_api_version_string() const override;
 
-		[[nodiscard]] u32 get_device_count() const override;
-		[[nodiscard]] const RenderDevice& get_device(u32 index) const override;
-		[[nodiscard]] bool get_device_supports_surface(u32 index, SurfaceID surface) const override;
+		u32 get_device_count() const override;
+		const RenderDevice& get_device(u32 index) const override;
+		bool get_device_supports_surface(u32 index, SurfaceID surface) const override;
 		void select_device(u32 index) override;
 
-		[[nodiscard]] u32 choose_queue_family(QueueType type, SurfaceID surface) override;
+		u32 choose_queue_family(QueueType type, SurfaceID surface) override;
+		
 		[[nodiscard]] QueueID get_queue(u32 queue_family) override;
 		void free_queue(QueueID queue) override;
 
@@ -89,7 +90,7 @@ namespace Nova {
 
 		[[nodiscard]] SwapchainID create_swapchain(SurfaceID surface) override;
 		void resize_swapchain(SwapchainID swapchain) override;
-		[[nodiscard]] RenderPassID get_swapchain_render_pass(SwapchainID swapchain) const override;
+		RenderPassID get_swapchain_render_pass(SwapchainID swapchain) const override;
 		void destroy_swapchain(SwapchainID swapchain) override;
 
 		[[nodiscard]] ShaderID create_shader(const std::span<u8> bytes, ShaderStage stage) override;
@@ -109,8 +110,8 @@ namespace Nova {
 		void begin_command_buffer(CommandBufferID command_buffer) override;
 		void end_command_buffer(CommandBufferID command_buffer) override;
 
-		[[nodiscard]] VkInstance get_instance() const;
-		[[nodiscard]] VkAllocationCallbacks* get_allocator(VkObjectType type) const;
+		VkInstance get_instance() const;
+		VkAllocationCallbacks* get_allocator(VkObjectType type) const;
 
 	  private:
 		WindowDriver* m_window_driver = nullptr;
