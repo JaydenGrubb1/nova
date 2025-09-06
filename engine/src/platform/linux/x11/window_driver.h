@@ -27,10 +27,10 @@ namespace Nova {
 		void beep() override;
 
 		u32 get_window_count() const override;
-		[[nodiscard]] WindowID create_window(std::string_view title, u32 width, u32 height) override;
+		[[nodiscard]] WindowID create_window(const std::string& title, u32 width, u32 height) override;
 		void destroy_window(WindowID window) override;
 
-		void set_window_title(WindowID window, std::string_view title) override;
+		void set_window_title(WindowID window, const std::string& title) override;
 		void set_window_size(WindowID window, u32 width, u32 height) override;
 		void set_window_position(WindowID window, i32 x, i32 y) override;
 

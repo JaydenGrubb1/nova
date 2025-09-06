@@ -108,7 +108,7 @@ u32 X11WindowDriver::get_window_count() const {
 	return static_cast<u32>(m_windows.size());
 }
 
-WindowID X11WindowDriver::create_window(const std::string_view p_title, const u32 p_width, const u32 p_height) {
+WindowID X11WindowDriver::create_window(const std::string& p_title, const u32 p_width, const u32 p_height) {
 	NOVA_AUTO_TRACE();
 
 	X11::Window handle = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, p_width, p_height, 0, 0, 0);
@@ -120,7 +120,7 @@ WindowID X11WindowDriver::create_window(const std::string_view p_title, const u3
 
 	XSetWMProtocols(m_display, handle, &m_window_close_atom, 1);
 	XSelectInput(m_display, handle, StructureNotifyMask);
-	XStoreName(m_display, handle, p_title.data());
+	XStoreName(m_display, handle, p_title.c_str());
 	XMapWindow(m_display, handle);
 	XFlush(m_display);
 
@@ -135,10 +135,10 @@ void X11WindowDriver::destroy_window(WindowID p_window) {
 	m_windows.erase(p_window->handle);
 }
 
-void X11WindowDriver::set_window_title(WindowID p_window, const std::string_view p_title) {
+void X11WindowDriver::set_window_title(WindowID p_window, const std::string& p_title) {
 	NOVA_AUTO_TRACE();
 	NOVA_ASSERT(p_window);
-	XStoreName(m_display, p_window->handle, p_title.data());
+	XStoreName(m_display, p_window->handle, p_title.c_str());
 }
 
 void X11WindowDriver::set_window_size(WindowID p_window, const u32 p_width, const u32 p_height) {
