@@ -8,7 +8,6 @@
 #include <nova/platform/window_driver.h>
 #include <nova/render/render_device.h>
 #include <nova/render/render_driver.h>
-#include <nova/render/render_params.h>
 #include <nova/types.h>
 
 #include <cstdlib>
