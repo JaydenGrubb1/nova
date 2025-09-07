@@ -44,7 +44,7 @@ namespace Nova {
 	};
 } // namespace Nova
 
-#define NOVA_LOG(...) ::Nova::Debug::get_logger()->info(__VA_ARGS__)
+#define NOVA_INFO(...) ::Nova::Debug::get_logger()->info(__VA_ARGS__)
 #define NOVA_WARN(...) ::Nova::Debug::get_logger()->warn(__VA_ARGS__)
 #define NOVA_ERROR(...) ::Nova::Debug::get_logger()->error(__VA_ARGS__)
 #define NOVA_CRITICAL(...) ::Nova::Debug::get_logger()->critical(__VA_ARGS__)

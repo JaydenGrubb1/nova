@@ -14,7 +14,6 @@
 #include <nova/platform/window_driver.h>
 #include <nova/render/render_device.h>
 #include <nova/version.h>
-
 #include <vulkan/vulkan.h>
 
 #include <algorithm>
@@ -376,7 +375,7 @@ void VulkanRenderDriver::select_device(const u32 p_index) {
 	NOVA_ASSERT(!m_device);
 	NOVA_ASSERT(p_index < m_devices.size());
 
-	NOVA_LOG("Using device: {}", m_devices[p_index].name);
+	NOVA_INFO("Using device: {}", m_devices[p_index].name);
 	m_physical_device = static_cast<VkPhysicalDevice>(m_devices[p_index].handle);
 
 	_check_device_extensions();
@@ -983,7 +982,7 @@ void VulkanRenderDriver::_check_version() const {
 		throw std::runtime_error("Vulkan API version is too low");
 	}
 
-	NOVA_LOG(
+	NOVA_INFO(
 		"Vulkan API version: {}.{}.{}-{}",
 		VK_API_VERSION_MAJOR(version),
 		VK_API_VERSION_MINOR(version),
@@ -1020,7 +1019,7 @@ void VulkanRenderDriver::_check_extensions() {
 	// Check found extensions
 	for (const auto& extension : available) {
 		if (auto it = requested.find(extension.extensionName); it != requested.end()) {
-			NOVA_LOG("Using extension: {}", extension.extensionName);
+			NOVA_INFO("Using extension: {}", extension.extensionName);
 			m_extensions.push_back(it->first.data());
 			requested.erase(it);
 		}
@@ -1058,7 +1057,7 @@ void VulkanRenderDriver::_check_layers() {
 	// Check found layers
 	for (const auto& layer : available) {
 		if (std::string_view(layer.layerName) == VALIDATION_LAYER) {
-			NOVA_LOG("Using layer: {}", layer.layerName);
+			NOVA_INFO("Using layer: {}", layer.layerName);
 			m_layers.push_back(VALIDATION_LAYER.data());
 			return;
 		}
@@ -1113,7 +1112,7 @@ void VulkanRenderDriver::_init_hardware() {
 			.handle = device,
 		});
 
-		NOVA_LOG("Found device: {}", properties.deviceName);
+		NOVA_INFO("Found device: {}", properties.deviceName);
 	}
 
 	if (m_devices.empty()) {
@@ -1137,7 +1136,7 @@ void VulkanRenderDriver::_check_device_extensions() {
 	// Check found extensions
 	for (const auto& extension : available) {
 		if (auto it = requested.find(extension.extensionName); it != requested.end()) {
-			NOVA_LOG("Using device extension: {}", extension.extensionName);
+			NOVA_INFO("Using device extension: {}", extension.extensionName);
 			m_device_extensions.push_back(it->first.data());
 			requested.erase(it);
 		}
@@ -1194,7 +1193,7 @@ void VulkanRenderDriver::_init_queues(std::vector<VkDeviceQueueCreateInfo>& p_qu
 			continue;
 		}
 
-		NOVA_LOG("Using queue family: {}", i);
+		NOVA_INFO("Using queue family: {}", i);
 		found |= available[i].queueFlags;
 
 		VkDeviceQueueCreateInfo create {};
