@@ -7,13 +7,63 @@ set(NOVA_ENGINE_SRC
 
 list(TRANSFORM NOVA_ENGINE_SRC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
-add_library(nova SHARED ${NOVA_ENGINE_SRC})
+add_library(nova ${NOVA_ENGINE_SRC})
 
 target_include_directories(nova
-	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+	PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_compile_definitions(nova
-	PRIVATE NOVA_EXPORT_SYMBOLS
+set_target_properties(nova PROPERTIES
+	DEFINE_SYMBOL NOVA_EXPORT_SYMBOLS
+	VERSION ${PROJECT_VERSION}
+	SOVERSION ${PROJECT_VERSION_MAJOR}
 )
+
+add_library(nova::nova ALIAS nova)
+
+if (NOVA_LIBRARY_INSTALL)
+	configure_package_config_file(
+		${CMAKE_CURRENT_SOURCE_DIR}/cmake/nova-config.cmake.in
+		${CMAKE_CURRENT_BINARY_DIR}/nova-config.cmake
+		INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nova
+	)
+
+	write_basic_package_version_file(
+		${CMAKE_CURRENT_BINARY_DIR}/nova-config-version.cmake
+		VERSION ${PROJECT_VERSION}
+		COMPATIBILITY SameMajorVersion
+	)
+
+	install(
+		TARGETS nova
+		EXPORT nova-targets
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+		INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+	)
+
+	install(
+		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/nova
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+		FILES_MATCHING PATTERN "*.hpp"
+	)
+
+	install(
+		EXPORT nova-targets
+		FILE nova-targets.cmake
+		NAMESPACE nova::
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nova
+	)
+
+	install(
+		FILES
+			${CMAKE_CURRENT_BINARY_DIR}/nova-config.cmake
+			${CMAKE_CURRENT_BINARY_DIR}/nova-config-version.cmake
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nova
+	)
+endif()

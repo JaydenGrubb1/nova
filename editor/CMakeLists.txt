@@ -15,5 +15,5 @@ target_include_directories(nova-editor
 )
 
 target_link_libraries(nova-editor
-	PUBLIC nova
+	PUBLIC nova::nova
 )
