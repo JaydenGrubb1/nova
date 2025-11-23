@@ -23,6 +23,11 @@ set(NOVA_SANITIZERS "" CACHE STRING "Sanitizers to enable (address, undefined, l
 set(NOVA_WERROR OFF CACHE BOOL "Treat compiler warnings as errors")
 set(NOVA_LIBRARY_INSTALL OFF CACHE BOOL "Enable library installation targets")
 
+# set(NOVA_BACKEND_DX12 ON CACHE BOOL "Enable DX12 backend")
+# set(NOVA_BACKEND_METAL ON CACHE BOOL "Enable Metal backend")
+set(NOVA_BACKEND_VULKAN ON CACHE BOOL "Enable Vulkan backend")
+# set(NOVA_BACKEND_WEBGPU ON CACHE BOOL "Enable WebGPU backend")
+
 add_compile_definitions(
 	NOVA_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
 	NOVA_VERSION_MINOR=${PROJECT_VERSION_MINOR}

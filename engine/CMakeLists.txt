@@ -3,6 +3,7 @@
 
 set(NOVA_ENGINE_SRC
 	core/debug.cpp
+	graphics/context.cpp
 )
 
 list(TRANSFORM NOVA_ENGINE_SRC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/)
@@ -16,6 +17,22 @@ target_include_directories(nova
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+if (NOVA_BACKEND_VULKAN)
+	find_package(Vulkan REQUIRED)
+
+	set(NOVA_VULKAN_SRC
+		backends/vulkan/context.cpp
+		backends/vulkan/device.cpp
+	)
+
+	list(TRANSFORM NOVA_VULKAN_SRC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/)
+
+	target_sources(nova PRIVATE ${NOVA_VULKAN_SRC})
+	target_compile_definitions(nova PRIVATE NOVA_BACKEND_VULKAN)
+	target_include_directories(nova PRIVATE ${Vulkan_INCLUDE_DIRS})
+	target_link_libraries(nova PRIVATE Vulkan::Vulkan)
+endif()
 
 set_target_properties(nova PROPERTIES
 	DEFINE_SYMBOL NOVA_EXPORT_SYMBOLS
