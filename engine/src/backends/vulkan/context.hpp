@@ -14,6 +14,8 @@ namespace nova::gfx {
 
 class VulkanContext final : public IContext {
   public:
+	VulkanContext();
+
 	API get_api() const override;
 	std::string get_api_name() const override;
 

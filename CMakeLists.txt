@@ -28,6 +28,8 @@ set(NOVA_LIBRARY_INSTALL OFF CACHE BOOL "Enable library installation targets")
 set(NOVA_BACKEND_VULKAN ON CACHE BOOL "Enable Vulkan backend")
 # set(NOVA_BACKEND_WEBGPU ON CACHE BOOL "Enable WebGPU backend")
 
+set(NOVA_USE_VOLK ON CACHE BOOL "Use volk for Vulkan function loading")
+
 add_compile_definitions(
 	NOVA_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
 	NOVA_VERSION_MINOR=${PROJECT_VERSION_MINOR}

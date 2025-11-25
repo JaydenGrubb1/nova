@@ -1,6 +1,8 @@
 # Copyright (c) 2025, Jayden Grubb <contact@jaydengrubb.com>
 # SPDX-License-Identifier: BSD-3-Clause
 
+include(FetchContent)
+
 set(NOVA_ENGINE_SRC
 	core/debug.cpp
 	graphics/context.cpp
@@ -31,7 +33,21 @@ if (NOVA_BACKEND_VULKAN)
 	target_sources(nova PRIVATE ${NOVA_VULKAN_SRC})
 	target_compile_definitions(nova PRIVATE NOVA_BACKEND_VULKAN)
 	target_include_directories(nova PRIVATE ${Vulkan_INCLUDE_DIRS})
-	target_link_libraries(nova PRIVATE Vulkan::Vulkan)
+
+	if (NOVA_USE_VOLK)
+		FetchContent_Declare(
+			volk
+			GIT_REPOSITORY https://github.com/zeux/volk.git
+			GIT_TAG f30088b3f4160810b53e19258dd2f7395e5f0ba3 # 1.4.328.1
+		)
+		FetchContent_MakeAvailable(volk)
+
+		target_compile_definitions(nova PRIVATE NOVA_USE_VOLK)
+		target_include_directories(nova PRIVATE ${volk_INCLUDE_DIRS})
+		target_link_libraries(nova PRIVATE volk::volk)
+	else()
+		target_link_libraries(nova PRIVATE Vulkan::Vulkan)
+	endif()
 endif()
 
 set_target_properties(nova PROPERTIES

@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#if defined(NOVA_USE_VOLK)
+	#include <volk.h>
+#endif
+
 #include <vulkan/vulkan.h>
 
 #include <format>
@@ -12,6 +16,14 @@
 #include "backends/vulkan/device.hpp"
 
 namespace nova::gfx {
+
+VulkanContext::VulkanContext() {
+#if defined(NOVA_USE_VOLK)
+	if (volkInitialize() != VK_SUCCESS) {
+		throw std::runtime_error("Failed to initialize volk");
+	}
+#endif
+}
 
 API VulkanContext::get_api() const {
 	return API::VULKAN;
